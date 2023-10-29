@@ -37,6 +37,8 @@ import android.view.ViewGroup;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.github.chrisbanes.photoview.PhotoView;
+
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener{
 
     private AppBarConfiguration appBarConfiguration;
@@ -49,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PhotoView photoView = findViewById(R.id.photoView);
+        photoView.setImageResource(R.drawable.image4);
         /* 키 해시 얻기*/
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
@@ -102,14 +107,16 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         //지도를 띄우자
         // java code
+        /*
         mapView = new MapView(this);
         mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+         */
     }
 
-    // 권한 체크 이후로직
+    // 권한 체크 이후 로직
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grandResults) {
         // READ_PHONE_STATE의 권한 체크 결과를 불러온다
