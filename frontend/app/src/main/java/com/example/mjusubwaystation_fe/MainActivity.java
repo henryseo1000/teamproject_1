@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+
         /*binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
