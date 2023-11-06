@@ -9,8 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import static com.group6.myapplication.MainActivity.email;
-import static com.group6.myapplication.MainActivity.password;
+import static com.example.mjusubwaystation_fe.MainActivity.email;
+import static com.example.mjusubwaystation_fe.MainActivity.password;
 
 public class RequestHttpURLConnection {
 

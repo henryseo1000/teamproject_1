@@ -1,9 +1,11 @@
 package com.example.mjusubwaystation_fe;
 import android.Manifest;
 
+import android.content.ContentValues;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -33,6 +35,10 @@ import com.example.mjusubwaystation_fe.databinding.ActivityMainBinding;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.view.MotionEvent;
+import android.widget.TextView;
+import android.widget.Button;
+import android.widget.EditText;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -40,7 +46,10 @@ import java.security.NoSuchAlgorithmException;
 import com.github.chrisbanes.photoview.PhotoView;
 
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener{
-
+    private TextView tv_outPut;
+    public EditText edit_email,edit_password;
+    public Button btn_login;
+    public static String email,password;
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
@@ -67,6 +76,27 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+
+
+
+        /*photoView.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        break;
+                        case MotionEvent.ACTION_MOVE:
+                            v.setX(event.getX());
+                            v.setY(event.getY());
+                            break;
+                            case MotionEvent.ACTION_CANCEL:
+                                case MotionEvent.ACTION_UP:
+                                    break;
+                }
+                return true;
+            }
+
+
+        });*/
 
         /*binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -232,5 +262,34 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     @Override
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
 
+    }
+
+    public class NetworkTask extends AsyncTask<Void, Void, String> {
+        
+        private String url = "https://jsonplaceholder.typicode.com/todos/1";
+        private ContentValues values;
+
+        public NetworkTask(String url, ContentValues values) {
+            this.url = url;
+            this.values = values;
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            String result; // 요청 결과를 저장할 변수.
+            RequestHttpURLConnection requestHttpURLConnection = new RequestHttpURLConnection();
+            result = requestHttpURLConnection.request(url, values); // 해당 URL로 부터 결과물을 얻어온다.
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            //doInBackground()로 부터 리턴된 값이 onPostExecute()의 매개변수로 넘어오므로 s를 출력한다.
+            tv_outPut.setText(s);
+        }
     }
 }
