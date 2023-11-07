@@ -82,7 +82,7 @@
     </style>
 </head>
 <body>
-    <h2>Hello Spring Boot!!</h2>
+    <h2>지하철</h2>
     <a href="/member/save">회원가입</a>
     <a href="/member/login">로그인</a>
     <a href="/member/">회원목록</a>
@@ -96,9 +96,16 @@
 
     <!--  ---------------경로 입력-------------------------->
     <div id="enter-route">
+        검색 옵션: <select name="search-option" id="search-option">
+        <option value="distance">최단거리</option>
+        <option value="time">최소시간</option>
+        <option value="expense">최소비용</option>
+        </select><br>
+        출발 시간 : <input type="time" name="start-time" id="start-time"><br>
         출발역: <input type="number" name="start" id="start"> <br>
         도착역: <input type="number" name="end" id="end"> <br>
         <button id="search-btn" onclick="route()">경로 조회</button>
+
     </div>
     <!--  ---------------경로 출력-------------------------->
     <div id="search-route"></div>
@@ -118,6 +125,8 @@
     const route = () => {
         const start = document.getElementById("start").value;
         const end = document.getElementById("end").value;
+        const search_option = document.getElementById("search-option").value;
+        const start_time = document.getElementById("start-time").value;
         console.log("시작역: ", start);
         console.log("도착역: ", end);
         $.ajax({
@@ -125,7 +134,9 @@
             url: "/station/search",
             data: {
                 "start": start,
-                "end": end
+                "end": end,
+                "search_option" : search_option,
+                "start_time" : start_time
             },
             success: function (res) {
                 console.log("요청성공", res);
@@ -133,11 +144,12 @@
                 const end = res.end;
                 const result = res.result;
                 const shortestPath = res.shortestPath;
+                const shortestTime = res.shortestTime;
 
                 let output = "<table>";
                 output += "<tr><th>출발역</th>";
                 output += "<th>도착역</th>";
-                output += "<th>소요시간</th>";
+                output += "<th>"+ search_option +"</th>";
                 output += "<tr>";
                 output += "<td>" + start + "</td>";
                 output += "<td>" + end + "</td>";
@@ -149,6 +161,15 @@
                 output += "<tr><th>경로</th></tr>";
                 output += "<tr><td>"
                 for (const item of shortestPath){
+                    output += item + " → ";
+                }
+                output += "</td></tr>";
+                output += "</table>";
+
+                output += "<table>";
+                output += "<tr><th>역 시간</th></tr>";
+                output += "<tr><td>"
+                for (const item of shortestTime){
                     output += item + " → ";
                 }
                 output += "</td></tr>";

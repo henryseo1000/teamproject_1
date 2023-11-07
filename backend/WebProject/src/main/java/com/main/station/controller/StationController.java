@@ -18,8 +18,12 @@ public class StationController {
     private final RouteService routeService;
 
     @PostMapping("/search")
-    public ResponseEntity<StationDTO> search(@RequestParam("start") int start, @RequestParam("end") int end) throws IOException, IOException {
-        StationDTO stationDTO = routeService.search(start,end);
+    public ResponseEntity<StationDTO> search(@RequestParam("start") int start,
+                                             @RequestParam("end") int end,
+                                             @RequestParam("search_option") String type,
+                                             @RequestParam("start_time") String time
+                                             ) throws IOException, IOException {
+        StationDTO stationDTO = routeService.search(start,end,type,time);
         return new ResponseEntity<>(stationDTO, HttpStatus.OK);
     }
 
