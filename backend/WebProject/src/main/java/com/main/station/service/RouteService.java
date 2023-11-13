@@ -1,8 +1,11 @@
 package com.main.station.service;
 
 import com.main.station.dto.StationDTO;
+import com.main.station.dto.StationTimeDTO;
 import com.main.station.entity.StationEntity;
+import com.main.station.entity.StationTimeEntity;
 import com.main.station.repository.StationRepository;
+import com.main.station.repository.StationTimeRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class RouteService {
     private final StationRepository stationRepository;
+    private final StationTimeRepository stationTimeRepository;
 
     @AllArgsConstructor
     static class Node {
@@ -21,11 +25,50 @@ public class RouteService {
         int cost; // 가중치
     }
 
-    public List<StationDTO> findAll() {
+
+    public List<StationTimeDTO> findAllTime(List<StationTimeEntity> stationTimeEntityList, int station_id) {
+        List<StationTimeDTO> stationTimeDTOList = new ArrayList<>();
+        for(StationTimeEntity stationTimeEntity : stationTimeEntityList) {
+            if (stationTimeEntity.getStation_id() == station_id) {
+                stationTimeDTOList.add(StationTimeDTO.toStationDTO(stationTimeEntity));
+            }
+        }
+        return stationTimeDTOList;
+    }
+
+    //위의 findAll에 대해 특정 시간을 필터링 ( 시간 비교해서 제일 빠른 출발시간)
+    public void getShortestTime(LinkedList<Integer> shortestPath, String now_time){
+        shortestTime = new ArrayList<>();
+        String compareTime = now_time;
+        List<StationTimeEntity> stationTimeEntityList = stationTimeRepository.findAll();
+        for(int station:shortestPath){
+            List<StationTimeDTO> stationTimeList =findAllTime(stationTimeEntityList,station);
+            for(StationTimeDTO stationTimeDTO : stationTimeList){
+                if (stationTimeDTO.getStart_time().compareTo(compareTime) > 0){
+                    shortestTime.add(stationTimeDTO.getStart_time());
+                    compareTime = stationTimeDTO.getStart_time();
+                    break;
+                }
+            }
+        }
+    }
+
+
+    public List<StationDTO> findAll(String type) {
         List<StationEntity> stationEntityList = stationRepository.findAll();
         List<StationDTO> stationDTOList = new ArrayList<>();
-        for (StationEntity stationEntity: stationEntityList){
-            stationDTOList.add(StationDTO.toStationDTOTime(stationEntity));
+        if (type.equals("time")) {
+            for (StationEntity stationEntity : stationEntityList) {
+                stationDTOList.add(StationDTO.toStationDTOTime(stationEntity));
+            }
+        } else if (type.equals("expense")) {
+            for (StationEntity stationEntity : stationEntityList) {
+                stationDTOList.add(StationDTO.toStationDTOExpense(stationEntity));
+            }
+        } else {
+            for (StationEntity stationEntity : stationEntityList) {
+                stationDTOList.add(StationDTO.toStationDTODistance(stationEntity));
+            }
         }
         return stationDTOList;
     }
@@ -34,23 +77,45 @@ public class RouteService {
     static HashMap<Integer, Integer> dist;
     static LinkedList<Integer> shortestPath;
     static HashSet<String> visitedEdges;
+    static List<String> shortestTime;
 
-    public StationDTO search(int start, int end) throws IOException {
+
+
+    public StationDTO search(int start, int end, String type, String time) throws IOException {
         //int e = stationRepository.countAllEdge();
-        int link = 139;
-        int node = 110;
+        System.out.println("time = " + time);
 
+        switch (type) {
+            case "최단거리":
+                type = "distance";
+                break;
+
+            case "최소시간":
+                type = "time";
+                break;
+
+            case "최소비용":
+                type = "expense";
+                break;
+        }
+        System.out.println("type = " + type);
         graph = new HashMap<>();
         dist = new HashMap<>();
         visitedEdges = new HashSet<>();
 
-        List<StationDTO> stationDTOList = findAll();
+        List<StationDTO> stationDTOList = findAll(type);
 
         for (StationDTO stationDTO: stationDTOList) {
             int inputU = stationDTO.getStart();
             int inputV = stationDTO.getEnd();
-            int inputW = stationDTO.getTime();
-
+            int inputW;
+            if (type.equals("time")) {
+                inputW = stationDTO.getTime();
+            } else if (type.equals("distance")) {
+                inputW = stationDTO.getDistance();
+            } else {
+                inputW = stationDTO.getExpense();
+            }
             String edgeKey = inputU + "-" + inputV;
             if (!visitedEdges.contains(edgeKey)) {
                 visitedEdges.add(edgeKey);
@@ -63,8 +128,9 @@ public class RouteService {
 
 
         dijkstra(start, end);
+        getShortestTime(shortestPath, time);
 
-        return StationDTO.setResult(start,end,dist.get(end),shortestPath);
+        return StationDTO.setResult(start,end,dist.get(end),shortestPath,shortestTime);
     }
 
     private void dijkstra(int start, int end){
