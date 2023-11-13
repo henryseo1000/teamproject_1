@@ -3,6 +3,7 @@ import static android.content.ContentValues.TAG;
 
 import android.Manifest;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,9 +11,11 @@ import android.os.Bundle;
 import com.example.mjusubwaystation_fe.R;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.core.content.ContextCompat;
@@ -32,11 +35,18 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
+    /*
+    float previous_x = 0;
+    float previous_y = 0;
+     */
+
     private TextView output;
     public EditText startpoint_input, destination_input;
     public Button find_path;
+    //public Button btn;
     public static String startpoint, destination;
     public static Call<TestDTO> call;
+    TestDTO result;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<TestDTO> call, Response<TestDTO> response) {
                 if(response.isSuccessful()){
-                    TestDTO result = response.body();
+                    result = response.body();
                     Log.d(TAG, "성공 : \n" + result.toString());
                 }
                 else{
@@ -83,46 +93,56 @@ public class MainActivity extends AppCompatActivity {
                 destination = destination_input.getText().toString();
                 call = service1.get_data(startpoint);
                 call.enqueue(fun);
+
+                if(result != null) {
+                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
+                    intent.putExtra("response", result.toString());
+                    startActivity(intent);
+                }
+                else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage("출발역과 도착역 중 하나가 누락되었습니다! 다시 확인해주세요!");
+                    builder.setTitle("경고!");
+                    builder.show();
+                }
             }
+        });
+
+        photoView.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                float curX = event.getX();  //눌린 곳의 X좌표
+                float curY = event.getY();  //눌린 곳의 Y좌표
+
+                if(action == event.ACTION_DOWN) {   //처음 눌렸을 때
+                    printString("손가락 눌림 : " + curX + ", " + curY);
+                } else if(action == event.ACTION_MOVE) {    //누르고 움직였을 때
+                    printString("손가락 움직임 : " + curX + ", " + curY);
+
+                    /*ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
+                    smileX.start();
+
+                    ObjectAnimator smileY = ObjectAnimator.ofFloat(photoView, "translationY", previous_y, curY);
+                    smileY.start();*/
+
+                } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
+                    printString("손가락 뗌 : " + curX + ", " + curY);
+                } else if(action == event.ACTION_POINTER_DOWN){
+
+                }
+
+                return true;
+            }
+
+            private void printString(String s) {
+                //좌표 출력
+                output.setText(s); //한 줄씩 추가
+            }
+
         });
 
 
 
-        /*photoView.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                switch(event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        break;
-                        case MotionEvent.ACTION_MOVE:
-                            v.setX(event.getX());
-                            v.setY(event.getY());
-                            break;
-                            case MotionEvent.ACTION_CANCEL:
-                                case MotionEvent.ACTION_UP:
-                                    break;
-                }
-                return true;
-            }
-
-
-        });*/
-
-        /*binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        setSupportActionBar(binding.toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.INTERNET);
@@ -169,4 +189,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    //버튼
+    public void mOnPopupClick(View v){
+        Intent intent = new Intent(this, PathPopupActivity.class);
+        intent.putExtra("data", "Test Popup");
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                //데이터 받기
+                String result = data.getStringExtra("result");
+                output.setText(result);
+            }
+        }
+    }
+
 }
