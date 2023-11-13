@@ -3,6 +3,9 @@ import static android.content.ContentValues.TAG;
 
 import android.Manifest;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -18,6 +21,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import android.widget.TextView;
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     float previous_y = 0;
      */
 
+    private static final String CHANNEL_ID = "channel_1_ID";
+    private static final String CHANNEL_NAME = "channel_1";
     private TextView output;
     public EditText startpoint_input, destination_input;
     public Button find_path;
@@ -89,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         find_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
                 startpoint = startpoint_input.getText().toString();
                 destination = destination_input.getText().toString();
                 call = service1.get_data(startpoint);
@@ -130,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
                 } else if(action == event.ACTION_POINTER_DOWN){
 
                 }
-
                 return true;
             }
 
@@ -207,6 +213,28 @@ public class MainActivity extends AppCompatActivity {
                 output.setText(result);
             }
         }
+    }
+
+    public void showNotification(String message, String title){
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_LOW;
+
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    importance
+            );
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+
+        builder.setSmallIcon(R.drawable.clock);
+        builder.setContentTitle(title);
+        builder.setContentText(message);
+
+        notificationManager.notify(0, builder.build());
     }
 
 }
