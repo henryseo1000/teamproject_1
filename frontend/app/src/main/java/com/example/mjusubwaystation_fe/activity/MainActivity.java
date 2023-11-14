@@ -39,11 +39,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    /*
-    float previous_x = 0;
-    float previous_y = 0;
-     */
-
     private static final String CHANNEL_ID = "channel_1_ID";
     private static final String CHANNEL_NAME = "channel_1";
     private TextView output;
@@ -74,6 +69,27 @@ public class MainActivity extends AppCompatActivity {
         startpoint_input = (EditText) findViewById(R.id.edit_email);
         destination_input = (EditText) findViewById(R.id.edit_password);
 
+        int permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.INTERNET);
+
+        int permission2 = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+        int permission3 = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
+
+        // 권한이 열려있는지 확인
+        if (permission == PackageManager.PERMISSION_DENIED || permission2 == PackageManager.PERMISSION_DENIED || permission3 == PackageManager.PERMISSION_DENIED) {
+            // 마쉬멜로우 이상버전부터 권한을 물어본다
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // 권한 체크(READ_PHONE_STATE의 requestCode를 1000으로 세팅
+                requestPermissions(
+                        new String[]{Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                        1000);
+            }
+            return;
+        }
+
         Callback fun = new Callback<TestDTO>() {
             @Override
             public void onResponse(Call<TestDTO> call, Response<TestDTO> response) {
@@ -98,6 +114,10 @@ public class MainActivity extends AppCompatActivity {
                 showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
                 startpoint = startpoint_input.getText().toString();
                 destination = destination_input.getText().toString();
+
+                startpoint = startpoint.replaceAll(" ", "");
+                destination = destination.replaceAll(" ", "");
+
                 call = service1.get_data(startpoint);
                 call.enqueue(fun);
 
@@ -105,6 +125,12 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
                     intent.putExtra("response", result.toString());
                     startActivity(intent);
+                }
+                else if (!startpoint.equals("")){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage( startpoint + "은(는) 노선도에 존재하지 않습니다!");
+                    builder.setTitle("잘못된 경로입니다!");
+                    builder.show();
                 }
                 else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -146,30 +172,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-
-
-
-
-        int permission = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.INTERNET);
-
-        int permission2 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
-        int permission3 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION);
-
-        // 권한이 열려있는지 확인
-        if (permission == PackageManager.PERMISSION_DENIED || permission2 == PackageManager.PERMISSION_DENIED || permission3 == PackageManager.PERMISSION_DENIED) {
-            // 마쉬멜로우 이상버전부터 권한을 물어본다
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // 권한 체크(READ_PHONE_STATE의 requestCode를 1000으로 세팅
-                requestPermissions(
-                        new String[]{Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                        1000);
-            }
-            return;
-        }
     }
 
     // 권한 체크 이후 로직
