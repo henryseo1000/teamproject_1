@@ -3,6 +3,10 @@ import static android.content.ContentValues.TAG;
 
 import android.Manifest;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,11 +14,15 @@ import android.os.Bundle;
 import com.example.mjusubwaystation_fe.R;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import android.widget.TextView;
@@ -32,11 +40,15 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String CHANNEL_ID = "channel_1_ID";
+    private static final String CHANNEL_NAME = "channel_1";
     private TextView output;
     public EditText startpoint_input, destination_input;
     public Button find_path;
+    //public Button btn;
     public static String startpoint, destination;
     public static Call<TestDTO> call;
+    TestDTO result;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,72 +70,6 @@ public class MainActivity extends AppCompatActivity {
         startpoint_input = (EditText) findViewById(R.id.edit_email);
         destination_input = (EditText) findViewById(R.id.edit_password);
 
-        Callback fun = new Callback<TestDTO>() {
-            @Override
-            public void onResponse(Call<TestDTO> call, Response<TestDTO> response) {
-                if(response.isSuccessful()){
-                    TestDTO result = response.body();
-                    Log.d(TAG, "성공 : \n" + result.toString());
-                }
-                else{
-                    Log.d(TAG, "실패 : \n");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<TestDTO> call, Throwable t) {
-                Log.d(TAG, "onFailure : " + t.getMessage());
-            }
-        };
-
-        find_path.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startpoint = startpoint_input.getText().toString();
-                destination = destination_input.getText().toString();
-                call = service1.get_data(startpoint);
-                call.enqueue(fun);
-            }
-        });
-
-
-
-        /*photoView.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                switch(event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        break;
-                        case MotionEvent.ACTION_MOVE:
-                            v.setX(event.getX());
-                            v.setY(event.getY());
-                            break;
-                            case MotionEvent.ACTION_CANCEL:
-                                case MotionEvent.ACTION_UP:
-                                    break;
-                }
-                return true;
-            }
-
-
-        });*/
-
-        /*binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        setSupportActionBar(binding.toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
-
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.INTERNET);
 
@@ -144,6 +90,89 @@ public class MainActivity extends AppCompatActivity {
             }
             return;
         }
+
+        Callback fun = new Callback<TestDTO>() {
+            @Override
+            public void onResponse(Call<TestDTO> call, Response<TestDTO> response) {
+                if(response.isSuccessful()){
+                    result = response.body();
+                    Log.d(TAG, "성공 : \n" + result.toString());
+                }
+                else{
+                    Log.d(TAG, "실패 : \n");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TestDTO> call, Throwable t) {
+                Log.d(TAG, "onFailure : " + t.getMessage());
+            }
+        };
+
+        find_path.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
+                startpoint = startpoint_input.getText().toString();
+                destination = destination_input.getText().toString();
+
+                startpoint = startpoint.replaceAll(" ", "");
+                destination = destination.replaceAll(" ", "");
+
+                call = service1.get_data(startpoint);
+                call.enqueue(fun);
+
+                if(result != null) {
+                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
+                    intent.putExtra("response", result.toString());
+                    startActivity(intent);
+                }
+                else if (!startpoint.equals("")){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage( startpoint + "은(는) 노선도에 존재하지 않습니다!");
+                    builder.setTitle("잘못된 경로입니다!");
+                    builder.show();
+                }
+                else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage("출발역과 도착역 중 하나가 누락되었습니다! 다시 확인해주세요!");
+                    builder.setTitle("경고!");
+                    builder.show();
+                }
+            }
+        });
+
+        photoView.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                float curX = event.getX();  //눌린 곳의 X좌표
+                float curY = event.getY();  //눌린 곳의 Y좌표
+
+                if(action == event.ACTION_DOWN) {   //처음 눌렸을 때
+                    printString("손가락 눌림 : " + curX + ", " + curY);
+                } else if(action == event.ACTION_MOVE) {    //누르고 움직였을 때
+                    printString("손가락 움직임 : " + curX + ", " + curY);
+
+                    /*ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
+                    smileX.start();
+
+                    ObjectAnimator smileY = ObjectAnimator.ofFloat(photoView, "translationY", previous_y, curY);
+                    smileY.start();*/
+
+                } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
+                    printString("손가락 뗌 : " + curX + ", " + curY);
+                } else if(action == event.ACTION_POINTER_DOWN){
+
+                }
+                return true;
+            }
+
+            private void printString(String s) {
+                //좌표 출력
+                output.setText(s); //한 줄씩 추가
+            }
+
+        });
     }
 
     // 권한 체크 이후 로직
@@ -169,4 +198,46 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    //버튼
+    public void mOnPopupClick(View v){
+        Intent intent = new Intent(this, PathPopupActivity.class);
+        intent.putExtra("data", "Test Popup");
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                //데이터 받기
+                String result = data.getStringExtra("result");
+                output.setText(result);
+            }
+        }
+    }
+
+    public void showNotification(String message, String title){
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_LOW;
+
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    importance
+            );
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+
+        builder.setSmallIcon(R.drawable.clock);
+        builder.setContentTitle(title);
+        builder.setContentText(message);
+
+        notificationManager.notify(0, builder.build());
+    }
+
 }
