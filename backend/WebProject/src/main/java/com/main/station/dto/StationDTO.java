@@ -4,6 +4,7 @@ import com.main.station.entity.StationEntity;
 import lombok.*;
 
 import java.util.LinkedList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,6 +21,7 @@ public class StationDTO {
 
     private int result;
     private LinkedList<Integer> shortestPath;
+    private List<String> shortestTime;
 
     public static StationDTO toStationDTOTime(StationEntity stationEntity) {
         StationDTO stationDTO = new StationDTO();
@@ -30,12 +32,30 @@ public class StationDTO {
         return stationDTO;
     }
 
-    public static StationDTO setResult(int start, int end, int result, LinkedList<Integer> shortestPath){
+    public static StationDTO toStationDTODistance(StationEntity stationEntity) {
+        StationDTO stationDTO = new StationDTO();
+        stationDTO.setId(stationEntity.getId());
+        stationDTO.setEnd(stationEntity.getEnd());
+        stationDTO.setStart(stationEntity.getStart());
+        stationDTO.setDistance(stationEntity.getDistance());
+        return stationDTO;
+    }
+
+    public static StationDTO toStationDTOExpense(StationEntity stationEntity) {
+        StationDTO stationDTO = new StationDTO();
+        stationDTO.setId(stationEntity.getId());
+        stationDTO.setEnd(stationEntity.getEnd());
+        stationDTO.setStart(stationEntity.getStart());
+        stationDTO.setExpense(stationEntity.getExpense());
+        return stationDTO;
+    }
+    public static StationDTO setResult(int start, int end, int result, LinkedList<Integer> shortestPath, List<String> shortestTime){
         StationDTO stationDTO = new StationDTO();
         stationDTO.setStart(start);
         stationDTO.setEnd(end);
         stationDTO.setResult(result);
         stationDTO.setShortestPath(shortestPath);
+        stationDTO.setShortestTime(shortestTime);
         return stationDTO;
     }
 }
