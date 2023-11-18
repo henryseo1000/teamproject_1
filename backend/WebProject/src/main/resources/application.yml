@@ -1,14 +1,35 @@
-server:
-  port: 8000
+#server:
+#  port: 8000
+#
+#
+## database 연동 설정
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/db1?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#    username: parkjoo
+#    password: 9930
+#  thymeleaf:
+#    cache: false
+#
+#  jpa:
+#    database-platform: org.hibernate.dialect.MySQLDialect
+#    open-in-view: false
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
+#
 
 
-# database 연동 설정
+
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/db1?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: parkjoo
-    password: 9930
+    url: jdbc:mysql://project-08.c9w7nocu0hrn.ap-northeast-2.rds.amazonaws.com:3306/projectdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: teamproject08
+
   thymeleaf:
     cache: false
 
@@ -18,3 +39,17 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  packages-to-scan: com.main.station
+  swagger-ui:
+    path: /
+    disable-swagger-default-url: true
+    display-request-duration: true
+    operations-sorter: alpha
