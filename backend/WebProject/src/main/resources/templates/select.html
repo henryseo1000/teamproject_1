@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>selectedRoute</title>
+</head>
+<body>
+<div th:if="${optimizedRoute != null}">
+    <!-- Display optimizedRoute data as needed -->
+    <h1>요청성공</h1>
+    <p>Start: <span th:text="${optimizedRoute.start}"></span></p>
+    <p>End: <span th:text="${optimizedRoute.end}"></span></p>
+    <p>result: <span th:text="${optimizedRoute.result}"></span></p>
+    <ul>
+        <li th:each="pathItem : ${optimizedRoute.shortestPath}">
+            <span th:text="${pathItem}"></span>
+        </li>
+    </ul>
+
+    <!-- Display shortestTime -->
+    <ul>
+        <li th:each="timeItem : ${optimizedRoute.shortestTime}">
+            <span th:text="${timeItem}"></span>
+        </li>
+    </ul>
+
+    <!-- Add more fields as needed -->
+</div>
+</body>
+</html>

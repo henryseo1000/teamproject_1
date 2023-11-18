@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
+import com.example.mjusubwaystation_fe.service.RouteDTO;
 import com.example.mjusubwaystation_fe.service.TestDTO;
 import com.github.chrisbanes.photoview.PhotoView;
 
@@ -47,8 +48,9 @@ public class MainActivity extends AppCompatActivity {
     public Button find_path;
     //public Button btn;
     public static String startpoint, destination;
-    public static Call<TestDTO> call;
-    TestDTO result;
+    public static Call<TestDTO> call2;
+    public static Call<RouteDTO> call;
+    RouteDTO result;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         photoView.setImageResource(R.drawable.image4);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://jsonplaceholder.typicode.com/")
+                .baseUrl("http://10.0.2.2:8000/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -91,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        Callback fun = new Callback<TestDTO>() {
+        Callback fun = new Callback<RouteDTO>() {
             @Override
-            public void onResponse(Call<TestDTO> call, Response<TestDTO> response) {
+            public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
                     result = response.body();
                     Log.d(TAG, "성공 : \n" + result.toString());
@@ -104,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<TestDTO> call, Throwable t) {
+            public void onFailure(Call<RouteDTO> call, Throwable t) {
                 Log.d(TAG, "onFailure : " + t.getMessage());
             }
         };
@@ -119,7 +121,10 @@ public class MainActivity extends AppCompatActivity {
                 startpoint = startpoint.replaceAll(" ", "");
                 destination = destination.replaceAll(" ", "");
 
-                call = service1.get_data(startpoint);
+                int start, end;
+                start = Integer.parseInt(startpoint);
+                end = Integer.parseInt(destination);
+                call = service1.getRouteData(start,end, "time", "16:30");
                 call.enqueue(fun);
 
                 if(result != null) {

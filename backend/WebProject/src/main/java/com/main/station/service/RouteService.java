@@ -1,5 +1,6 @@
 package com.main.station.service;
 
+import com.main.station.dto.OptimizedRoute;
 import com.main.station.dto.StationDTO;
 import com.main.station.dto.StationTimeDTO;
 import com.main.station.entity.StationEntity;
@@ -81,7 +82,7 @@ public class RouteService {
 
 
 
-    public StationDTO search(int start, int end, String type, String time) throws IOException {
+    public OptimizedRoute search(int start, int end, String type, String time) throws IOException {
         //int e = stationRepository.countAllEdge();
         System.out.println("time = " + time);
 
@@ -130,7 +131,7 @@ public class RouteService {
         dijkstra(start, end);
         getShortestTime(shortestPath, time);
 
-        return StationDTO.setResult(start,end,dist.get(end),shortestPath,shortestTime);
+        return OptimizedRoute.setResult(start,end,dist.get(end),shortestPath,shortestTime);
     }
 
     private void dijkstra(int start, int end){

@@ -109,6 +109,10 @@
     </div>
     <!--  ---------------경로 출력-------------------------->
     <div id="search-route"></div>
+    <!--  ------------------------------------------------->
+
+    <button id="select-btn" onclick="select()">경로 선택</button>
+
 </body>
 <script th:inline="javascript">
 
@@ -120,6 +124,10 @@
     }
     const pagingReq = () => {
         location.href = "/board/paging";
+    }
+
+    const select = () => {
+        location.href = "/station/select";
     }
 
     const route = () => {
