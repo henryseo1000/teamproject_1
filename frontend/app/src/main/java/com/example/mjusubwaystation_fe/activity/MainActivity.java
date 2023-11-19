@@ -17,14 +17,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,7 +31,9 @@ import android.widget.EditText;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.service.RouteDTO;
 import com.example.mjusubwaystation_fe.service.TestDTO;
+import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView output;
     public EditText startpoint_input, destination_input;
     public Button find_path;
+    public Button swap_path;
     //public Button btn;
     public static String startpoint, destination;
     public static Call<TestDTO> call2;
@@ -62,17 +64,19 @@ public class MainActivity extends AppCompatActivity {
         photoView.setImageResource(R.drawable.image4);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/")
+                .baseUrl("http://43.202.63.57:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         RetrofitInterface service1 = retrofit.create(RetrofitInterface.class);
+        PhotoViewAttacher attacher = new PhotoViewAttacher(photoView);
 
         // 위젯에 대한 참조.
-        output = (TextView) findViewById(R.id.tv_outPut);
-        find_path = (Button) findViewById(R.id.btn_login);
-        startpoint_input = (EditText) findViewById(R.id.edit_email);
-        destination_input = (EditText) findViewById(R.id.edit_password);
+        output = (TextView) findViewById(R.id.output);
+        find_path = (Button) findViewById(R.id.find_path);
+        swap_path = (Button) findViewById(R.id.swap);
+        startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
+        destination_input = (EditText) findViewById(R.id.edit_destination);
 
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.INTERNET);
@@ -100,9 +104,18 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
                     result = response.body();
+                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
+                    intent.putExtra("startpoint", result.getStart());
+                    intent.putExtra("destination", result.getEnd());
+                    intent.putExtra("time", result.getResult());
+                    startActivity(intent);
                     Log.d(TAG, "성공 : \n" + result.toString());
                 }
                 else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage(startpoint + "또는 " + destination + "은(는) 노선도에 존재하지 않습니다. 노선도를 다시 확인해주세요.");
+                    builder.setTitle("잘못된 경로입니다!");
+                    builder.show();
                     Log.d(TAG, "실패 : \n");
                 }
             }
@@ -112,6 +125,17 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onFailure : " + t.getMessage());
             }
         };
+
+        swap_path.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startpoint = startpoint_input.getText().toString();
+                destination = destination_input.getText().toString();
+
+                startpoint_input.setText(destination);
+                destination_input.setText(startpoint);
+            }
+        });
 
         find_path.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,17 +153,6 @@ public class MainActivity extends AppCompatActivity {
                     end = Integer.parseInt(destination);
                     call = service1.getRouteData(start, end, "time", "16:30");
                     call.enqueue(fun);
-
-                    if (result != null) {
-                        Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
-                        intent.putExtra("response", result.toString());
-                        startActivity(intent);
-                    } else if (!startpoint.equals("")) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setMessage(startpoint + "은(는) 노선도에 존재하지 않습니다!");
-                        builder.setTitle("잘못된 경로입니다!");
-                        builder.show();
-                    }
                 }
                 catch(Exception e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -150,7 +163,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        photoView.setOnTouchListener(new View.OnTouchListener() {
+        attacher.setOnPhotoTapListener(new OnPhotoTapListener() {
+            private void printString(String s) {
+                //좌표 출력
+                output.setText(s); //한 줄씩 추가
+            }
+            @Override
+            public void onPhotoTap(ImageView view, float x, float y) {
+                curX = x;  //눌린 곳의 X좌표
+                curY = y;  //눌린 곳의 Y좌표
+
+                printString("손가락 눌림 : " + curX + ", " + curY);
+                mOnPopupClick();
+
+            }
+        });
+
+        /*photoView.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
                 curX = event.getX();  //눌린 곳의 X좌표
@@ -161,11 +190,11 @@ public class MainActivity extends AppCompatActivity {
                 } else if(action == event.ACTION_MOVE) {    //누르고 움직였을 때
                     printString("손가락 움직임 : " + curX + ", " + curY);
 
-                    /*ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
+                    ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
                     smileX.start();
 
                     ObjectAnimator smileY = ObjectAnimator.ofFloat(photoView, "translationY", previous_y, curY);
-                    smileY.start();*/
+                    smileY.start();
 
                 } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
                     printString("손가락 뗌 : " + curX + ", " + curY);
@@ -181,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                 output.setText(s); //한 줄씩 추가
             }
 
-        });
+        });*/
     }
 
     // 권한 체크 이후 로직

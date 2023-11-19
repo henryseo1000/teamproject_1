@@ -14,34 +14,57 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="300dp"
             android:orientation="vertical"
             android:padding="20dp"
+            android:elevation="10dp"
             android:background="@drawable/round">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical|right"
+                        android:text="설정"
+                        android:textColor="@color/design_default_color_primary"
+                        />
+
+                </LinearLayout>
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/edit_email"
+                android:id="@+id/edit_startpoint"
                 android:hint="출발지 입력"
                 />
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/edit_password"
+                android:id="@+id/edit_destination"
                 android:hint="도착지 입력"
                 />
 
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="출발지 / 도착지 전환"
+                android:id="@+id/swap"
+                />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="길 찾기"
-                android:id="@+id/btn_login"
+                android:id="@+id/find_path"
                 />
 
             <TextView
-                android:id="@+id/tv_outPut"
+                android:id="@+id/output"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="출력 공간 : "
@@ -53,14 +76,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="20dp"
             android:background="#ffffff">
 
             <com.github.chrisbanes.photoview.PhotoView
                 android:id="@+id/photoView"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"/>
+                android:scaleType="centerCrop" />
 
         </LinearLayout>
 

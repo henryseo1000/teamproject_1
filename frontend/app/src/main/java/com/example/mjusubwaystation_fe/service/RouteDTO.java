@@ -22,10 +22,30 @@ public class RouteDTO {
 
     @Override
     public String toString(){
-        return "TestDTO{" +
+        return "RouteDTO{" +
                 "start=" + start +
                 ", end=" + end +
                 ", result='" + result + '\''  +
                 '}';
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public int getResult() {
+        return result;
+    }
+
+    public LinkedList<Integer> getShortestPath() {
+        return shortestPath;
+    }
+
+    public List<String> getShortestTime() {
+        return shortestTime;
     }
 }
