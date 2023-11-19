@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     public static Call<TestDTO> call2;
     public static Call<RouteDTO> call;
     RouteDTO result;
+    float curX;  //눌린 곳의 X좌표
+    float curY;  //눌린 곳의 Y좌표
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,31 +116,32 @@ public class MainActivity extends AppCompatActivity {
         find_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
-                startpoint = startpoint_input.getText().toString();
-                destination = destination_input.getText().toString();
+                try {
+                    showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
+                    startpoint = startpoint_input.getText().toString();
+                    destination = destination_input.getText().toString();
 
-                startpoint = startpoint.replaceAll(" ", "");
-                destination = destination.replaceAll(" ", "");
+                    startpoint = startpoint.replaceAll(" ", "");
+                    destination = destination.replaceAll(" ", "");
 
-                int start, end;
-                start = Integer.parseInt(startpoint);
-                end = Integer.parseInt(destination);
-                call = service1.getRouteData(start,end, "time", "16:30");
-                call.enqueue(fun);
+                    int start, end;
+                    start = Integer.parseInt(startpoint);
+                    end = Integer.parseInt(destination);
+                    call = service1.getRouteData(start, end, "time", "16:30");
+                    call.enqueue(fun);
 
-                if(result != null) {
-                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
-                    intent.putExtra("response", result.toString());
-                    startActivity(intent);
+                    if (result != null) {
+                        Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
+                        intent.putExtra("response", result.toString());
+                        startActivity(intent);
+                    } else if (!startpoint.equals("")) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setMessage(startpoint + "은(는) 노선도에 존재하지 않습니다!");
+                        builder.setTitle("잘못된 경로입니다!");
+                        builder.show();
+                    }
                 }
-                else if (!startpoint.equals("")){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage( startpoint + "은(는) 노선도에 존재하지 않습니다!");
-                    builder.setTitle("잘못된 경로입니다!");
-                    builder.show();
-                }
-                else {
+                catch(Exception e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage("출발역과 도착역 중 하나가 누락되었습니다! 다시 확인해주세요!");
                     builder.setTitle("경고!");
@@ -150,8 +153,8 @@ public class MainActivity extends AppCompatActivity {
         photoView.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
-                float curX = event.getX();  //눌린 곳의 X좌표
-                float curY = event.getY();  //눌린 곳의 Y좌표
+                curX = event.getX();  //눌린 곳의 X좌표
+                curY = event.getY();  //눌린 곳의 Y좌표
 
                 if(action == event.ACTION_DOWN) {   //처음 눌렸을 때
                     printString("손가락 눌림 : " + curX + ", " + curY);
@@ -166,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
                     printString("손가락 뗌 : " + curX + ", " + curY);
+                    mOnPopupClick();
                 } else if(action == event.ACTION_POINTER_DOWN){
 
                 }
@@ -205,9 +209,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //버튼
-    public void mOnPopupClick(View v){
+    public void mOnPopupClick(){
         Intent intent = new Intent(this, PathPopupActivity.class);
-        intent.putExtra("data", "Test Popup");
+        intent.putExtra("X", curX);
+        intent.putExtra("Y", curY);
         startActivityForResult(intent, 1);
     }
 

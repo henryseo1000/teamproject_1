@@ -17,6 +17,11 @@
         android:theme="@style/Theme.MJUSubwayStation_FE"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".activity.PathPopupActivity"
+            android:exported="false"
+            android:label="@string/title_activity_path_popup"
+            android:theme="@android:style/Theme.Holo.Dialog" />
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
@@ -29,6 +34,7 @@
             android:theme="@style/Theme.MJUSubwayStation_FE.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
