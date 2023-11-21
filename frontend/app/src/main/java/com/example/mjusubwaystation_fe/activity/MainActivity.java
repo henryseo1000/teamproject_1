@@ -17,14 +17,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,7 +35,13 @@ import android.widget.EditText;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.service.RouteDTO;
 import com.example.mjusubwaystation_fe.service.TestDTO;
+import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
+import com.google.android.material.navigation.NavigationView;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,31 +55,40 @@ public class MainActivity extends AppCompatActivity {
     private TextView output;
     public EditText startpoint_input, destination_input;
     public Button find_path;
-    //public Button btn;
+    public Button swap_path;
+    public TextView settings;
     public static String startpoint, destination;
-    public static Call<TestDTO> call2;
     public static Call<RouteDTO> call;
     RouteDTO result;
+    float curX;  //눌린 곳의 X좌표
+    float curY;  //눌린 곳의 Y좌표
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        drawerLayout = (DrawerLayout)findViewById(R.id.main_screen);
+        navigationView = (NavigationView)findViewById(R.id.navigation_view);
         PhotoView photoView = findViewById(R.id.photoView);
         photoView.setImageResource(R.drawable.image4);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/")
+                .baseUrl("http://43.202.63.57:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         RetrofitInterface service1 = retrofit.create(RetrofitInterface.class);
+        PhotoViewAttacher attacher = new PhotoViewAttacher(photoView);
 
         // 위젯에 대한 참조.
-        output = (TextView) findViewById(R.id.tv_outPut);
-        find_path = (Button) findViewById(R.id.btn_login);
-        startpoint_input = (EditText) findViewById(R.id.edit_email);
-        destination_input = (EditText) findViewById(R.id.edit_password);
+        output = (TextView) findViewById(R.id.output);
+        find_path = (Button) findViewById(R.id.find_path);
+        swap_path = (Button) findViewById(R.id.swap);
+        startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
+        destination_input = (EditText) findViewById(R.id.edit_destination);
+        settings = (TextView) findViewById(R.id.settings);
 
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.INTERNET);
@@ -98,9 +116,20 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
                     result = response.body();
+                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
+                    intent.putExtra("startpoint", result.getStart());
+                    intent.putExtra("destination", result.getEnd());
+                    intent.putExtra("time", result.getResult());
+                    intent.putExtra("path", toArrayList(result.getShortestPath()));
+
+                    startActivity(intent);
                     Log.d(TAG, "성공 : \n" + result.toString());
                 }
                 else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage(startpoint + "또는 " + destination + "은(는) 노선도에 존재하지 않습니다. 노선도를 다시 확인해주세요.");
+                    builder.setTitle("잘못된 경로입니다!");
+                    builder.show();
                     Log.d(TAG, "실패 : \n");
                 }
             }
@@ -111,34 +140,35 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        find_path.setOnClickListener(new View.OnClickListener() {
+        swap_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
                 startpoint = startpoint_input.getText().toString();
                 destination = destination_input.getText().toString();
 
-                startpoint = startpoint.replaceAll(" ", "");
-                destination = destination.replaceAll(" ", "");
+                startpoint_input.setText(destination);
+                destination_input.setText(startpoint);
+            }
+        });
 
-                int start, end;
-                start = Integer.parseInt(startpoint);
-                end = Integer.parseInt(destination);
-                call = service1.getRouteData(start,end, "time", "16:30");
-                call.enqueue(fun);
+        find_path.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
+                    startpoint = startpoint_input.getText().toString();
+                    destination = destination_input.getText().toString();
 
-                if(result != null) {
-                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
-                    intent.putExtra("response", result.toString());
-                    startActivity(intent);
+                    startpoint = startpoint.replaceAll(" ", "");
+                    destination = destination.replaceAll(" ", "");
+
+                    int start, end;
+                    start = Integer.parseInt(startpoint);
+                    end = Integer.parseInt(destination);
+                    call = service1.getRouteData(start, end, "time", "16:30");
+                    call.enqueue(fun);
                 }
-                else if (!startpoint.equals("")){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage( startpoint + "은(는) 노선도에 존재하지 않습니다!");
-                    builder.setTitle("잘못된 경로입니다!");
-                    builder.show();
-                }
-                else {
+                catch(Exception e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage("출발역과 도착역 중 하나가 누락되었습니다! 다시 확인해주세요!");
                     builder.setTitle("경고!");
@@ -147,25 +177,49 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        photoView.setOnTouchListener(new View.OnTouchListener() {
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
+        attacher.setOnPhotoTapListener(new OnPhotoTapListener() {
+            private void printString(String s) {
+                //좌표 출력
+                output.setText(s); //한 줄씩 추가
+            }
+            @Override
+            public void onPhotoTap(ImageView view, float x, float y) {
+                curX = x;  //눌린 곳의 X좌표
+                curY = y;  //눌린 곳의 Y좌표
+
+                printString("손가락 눌림 : " + curX + ", " + curY);
+                mOnPopupClick();
+
+            }
+        });
+
+        /*photoView.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
-                float curX = event.getX();  //눌린 곳의 X좌표
-                float curY = event.getY();  //눌린 곳의 Y좌표
+                curX = event.getX();  //눌린 곳의 X좌표
+                curY = event.getY();  //눌린 곳의 Y좌표
 
                 if(action == event.ACTION_DOWN) {   //처음 눌렸을 때
                     printString("손가락 눌림 : " + curX + ", " + curY);
                 } else if(action == event.ACTION_MOVE) {    //누르고 움직였을 때
                     printString("손가락 움직임 : " + curX + ", " + curY);
 
-                    /*ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
+                    ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
                     smileX.start();
 
                     ObjectAnimator smileY = ObjectAnimator.ofFloat(photoView, "translationY", previous_y, curY);
-                    smileY.start();*/
+                    smileY.start();
 
                 } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
                     printString("손가락 뗌 : " + curX + ", " + curY);
+                    mOnPopupClick();
                 } else if(action == event.ACTION_POINTER_DOWN){
 
                 }
@@ -177,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                 output.setText(s); //한 줄씩 추가
             }
 
-        });
+        });*/
     }
 
     // 권한 체크 이후 로직
@@ -205,9 +259,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //버튼
-    public void mOnPopupClick(View v){
+    public void mOnPopupClick(){
         Intent intent = new Intent(this, PathPopupActivity.class);
-        intent.putExtra("data", "Test Popup");
+        intent.putExtra("X", curX);
+        intent.putExtra("Y", curY);
         startActivityForResult(intent, 1);
     }
 
@@ -220,6 +275,15 @@ public class MainActivity extends AppCompatActivity {
                 String result = data.getStringExtra("result");
                 output.setText(result);
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() { //뒤로가기 했을 때
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -243,6 +307,16 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentText(message);
 
         notificationManager.notify(0, builder.build());
+    }
+
+    public ArrayList toArrayList(LinkedList<Integer> path){
+        ArrayList<String> path_list = new ArrayList<>();
+
+        for(int i = 0; i < path.size(); i++) {
+            path_list.add(path.get(i).toString());
+        }
+
+        return path_list;
     }
 
 }
