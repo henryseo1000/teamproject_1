@@ -40,6 +40,9 @@ import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -117,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("startpoint", result.getStart());
                     intent.putExtra("destination", result.getEnd());
                     intent.putExtra("time", result.getResult());
-                    intent.putExtra("path", result.getShortestPath());
+                    intent.putExtra("path", toArrayList(result.getShortestPath()));
 
                     startActivity(intent);
                     Log.d(TAG, "성공 : \n" + result.toString());
@@ -304,6 +307,16 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentText(message);
 
         notificationManager.notify(0, builder.build());
+    }
+
+    public ArrayList toArrayList(LinkedList<Integer> path){
+        ArrayList<String> path_list = new ArrayList<>();
+
+        for(int i = 0; i < path.size(); i++) {
+            path_list.add(path.get(i).toString());
+        }
+
+        return path_list;
     }
 
 }
