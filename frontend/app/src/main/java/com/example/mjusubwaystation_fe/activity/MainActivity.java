@@ -18,10 +18,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -55,11 +58,13 @@ public class MainActivity extends AppCompatActivity {
     RouteDTO result;
     float curX;  //눌린 곳의 X좌표
     float curY;  //눌린 곳의 Y좌표
+    //DrawerLayout drawerLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //drawerLayout = (DrawerLayout)findViewById(R.id.navigation_view);
         PhotoView photoView = findViewById(R.id.photoView);
         photoView.setImageResource(R.drawable.image4);
 
@@ -212,6 +217,18 @@ public class MainActivity extends AppCompatActivity {
 
         });*/
     }
+
+    /*
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:{ // 왼쪽 상단 버튼 눌렀을 때
+                drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }*/
 
     // 권한 체크 이후 로직
     @Override

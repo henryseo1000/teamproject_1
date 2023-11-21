@@ -25,8 +25,8 @@ public class PathPopupActivity extends Activity {
         Title.setText("터치 이벤트가 호출되었습니다!");
 
         Intent intent = getIntent();
-        float dataX = intent.getFloatExtra("X", 1);
-        float dataY = intent.getFloatExtra("Y", 1);
+        float dataX = intent.getFloatExtra("X", 0);
+        float dataY = intent.getFloatExtra("Y", 0);
 
         Content.setText("터치 좌표 : " + dataX + "," + dataY);
 

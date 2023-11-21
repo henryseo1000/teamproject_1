@@ -17,7 +17,7 @@
             android:layout_height="300dp"
             android:orientation="vertical"
             android:padding="20dp"
-            android:elevation="10dp"
+            android:elevation="5dp"
             android:background="@drawable/round">
 
                 <LinearLayout
@@ -87,5 +87,15 @@
         </LinearLayout>
 
     </LinearLayout>
+<!--
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/navi_header"
+        app:menu="@menu/navi_settings" />
+    -->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
