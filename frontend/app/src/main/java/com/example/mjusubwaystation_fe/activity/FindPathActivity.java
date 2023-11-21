@@ -6,9 +6,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.mjusubwaystation_fe.R;
+
+import java.util.LinkedList;
 
 public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview;
@@ -16,6 +20,8 @@ public class FindPathActivity extends AppCompatActivity {
     private int time;
     private int startpoint;
     private int destination;
+    private LinkedList<Integer> shortest_path;
+    LinearLayout content;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,11 +29,15 @@ public class FindPathActivity extends AppCompatActivity {
         setContentView(R.layout.activity_find_path);
 
         api_textview = (TextView) findViewById(R.id.textView);
+        content = (LinearLayout) findViewById(R.id.content);
 
         Intent intent = getIntent();
         time = intent.getIntExtra("time", 0);
         startpoint = intent.getIntExtra("startpoint", 0);
         destination = intent.getIntExtra("destination", 0);
+        shortest_path = intent.getParcelableExtra("path");
+
+        setpath(shortest_path);
 
         api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : " + time + "초\n약 " + toTime(time) + " 소요됩니다.");
         choose_path = (Button)findViewById(R.id.btn_choose_path);
@@ -52,5 +62,12 @@ public class FindPathActivity extends AppCompatActivity {
         left = left % 60;
 
         return hours + "시간 " + minutes + "분 "+ left + "초";
+    }
+
+    private void setpath(LinkedList<Integer> path){
+        TextView tv = new TextView(this);
+        tv.setText("test");
+        content.addView(tv);
+
     }
 }

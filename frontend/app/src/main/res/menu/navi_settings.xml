@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/app_bar_switch"
+        android:title="알림 받기"
+        app:actionLayout="@layout/switch_item"
+        app:showAsAction="always" />
     <item
         android:id="@+id/item_info"
         android:title="내 정보" />

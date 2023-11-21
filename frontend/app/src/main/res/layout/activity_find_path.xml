@@ -55,19 +55,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:id="@+id/scroll"
             android:padding="10dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                android:orientation="vertical"
+                android:background="#ffffff"
+                android:id="@+id/content">
 
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TextView"
+                    android:textSize="15sp"
+                    android:textColor="@color/black"
+                    tools:layout_editor_absoluteX="168dp"
+                    tools:layout_editor_absoluteY="123dp" />
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textSize="15sp"
-                android:textColor="@color/black"
-                tools:layout_editor_absoluteX="168dp"
-                tools:layout_editor_absoluteY="123dp" />
+            </LinearLayout>
 
         </ScrollView>
     </LinearLayout>

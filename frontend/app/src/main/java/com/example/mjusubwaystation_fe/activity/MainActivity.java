@@ -27,6 +27,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,6 +38,7 @@ import com.example.mjusubwaystation_fe.service.TestDTO;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
+import com.google.android.material.navigation.NavigationView;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,20 +53,21 @@ public class MainActivity extends AppCompatActivity {
     public EditText startpoint_input, destination_input;
     public Button find_path;
     public Button swap_path;
-    //public Button btn;
+    public TextView settings;
     public static String startpoint, destination;
-    public static Call<TestDTO> call2;
     public static Call<RouteDTO> call;
     RouteDTO result;
     float curX;  //눌린 곳의 X좌표
     float curY;  //눌린 곳의 Y좌표
-    //DrawerLayout drawerLayout;
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //drawerLayout = (DrawerLayout)findViewById(R.id.navigation_view);
+        drawerLayout = (DrawerLayout)findViewById(R.id.main_screen);
+        navigationView = (NavigationView)findViewById(R.id.navigation_view);
         PhotoView photoView = findViewById(R.id.photoView);
         photoView.setImageResource(R.drawable.image4);
 
@@ -82,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         swap_path = (Button) findViewById(R.id.swap);
         startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
         destination_input = (EditText) findViewById(R.id.edit_destination);
+        settings = (TextView) findViewById(R.id.settings);
 
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.INTERNET);
@@ -113,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("startpoint", result.getStart());
                     intent.putExtra("destination", result.getEnd());
                     intent.putExtra("time", result.getResult());
+                    intent.putExtra("path", result.getShortestPath());
+
                     startActivity(intent);
                     Log.d(TAG, "성공 : \n" + result.toString());
                 }
@@ -168,6 +174,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
         attacher.setOnPhotoTapListener(new OnPhotoTapListener() {
             private void printString(String s) {
                 //좌표 출력
@@ -218,18 +231,6 @@ public class MainActivity extends AppCompatActivity {
         });*/
     }
 
-    /*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:{ // 왼쪽 상단 버튼 눌렀을 때
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }*/
-
     // 권한 체크 이후 로직
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grandResults) {
@@ -271,6 +272,15 @@ public class MainActivity extends AppCompatActivity {
                 String result = data.getStringExtra("result");
                 output.setText(result);
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() { //뒤로가기 했을 때
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 
