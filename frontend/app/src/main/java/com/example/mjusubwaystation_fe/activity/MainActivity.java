@@ -1,10 +1,13 @@
 package com.example.mjusubwaystation_fe.activity;
 import static android.content.ContentValues.TAG;
 
+import static java.sql.Types.NULL;
+
 import android.Manifest;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,6 +34,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TimePicker;
 
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.service.RouteDTO;
@@ -38,6 +42,7 @@ import com.example.mjusubwaystation_fe.service.TestDTO;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -87,26 +92,14 @@ public class MainActivity extends AppCompatActivity {
         destination_input = (EditText) findViewById(R.id.edit_destination);
         settings = (TextView) findViewById(R.id.settings);
 
-        int permission = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.INTERNET);
-
-        int permission2 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
-        int permission3 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION);
-
-        // 권한이 열려있는지 확인
-        if (permission == PackageManager.PERMISSION_DENIED || permission2 == PackageManager.PERMISSION_DENIED || permission3 == PackageManager.PERMISSION_DENIED) {
-            // 마쉬멜로우 이상버전부터 권한을 물어본다
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // 권한 체크(READ_PHONE_STATE의 requestCode를 1000으로 세팅
-                requestPermissions(
-                        new String[]{Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                        1000);
+        FloatingActionButton fb = findViewById(R.id.fab);
+        fb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                startActivity(intent);
             }
-            return;
-        }
+        });
 
         Callback fun = new Callback<RouteDTO>() {
             @Override
@@ -198,42 +191,11 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 printString("손가락 눌림 : " + station);
-                mOnPopupClick(station);
+                if(station != NULL) {
+                    mOnPopupClick(station);
+                }
             }
         });
-
-        /*photoView.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                curX = event.getX();  //눌린 곳의 X좌표
-                curY = event.getY();  //눌린 곳의 Y좌표
-
-                if(action == event.ACTION_DOWN) {   //처음 눌렸을 때
-                    printString("손가락 눌림 : " + curX + ", " + curY);
-                } else if(action == event.ACTION_MOVE) {    //누르고 움직였을 때
-                    printString("손가락 움직임 : " + curX + ", " + curY);
-
-                    ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
-                    smileX.start();
-
-                    ObjectAnimator smileY = ObjectAnimator.ofFloat(photoView, "translationY", previous_y, curY);
-                    smileY.start();
-
-                } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
-                    printString("손가락 뗌 : " + curX + ", " + curY);
-                    mOnPopupClick();
-                } else if(action == event.ACTION_POINTER_DOWN){
-
-                }
-                return true;
-            }
-
-            private void printString(String s) {
-                //좌표 출력
-                output.setText(s); //한 줄씩 추가
-            }
-
-        });*/
     }
 
     // 권한 체크 이후 로직
@@ -312,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(0, builder.build());
     }
 
-    public ArrayList toArrayList(LinkedList<Integer> path){
+    public static ArrayList toArrayList(LinkedList<Integer> path){
         ArrayList<String> path_list = new ArrayList<>();
 
         for(int i = 0; i < path.size(); i++) {

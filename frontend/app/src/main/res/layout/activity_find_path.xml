@@ -18,8 +18,7 @@
             android:layout_height="230dp"
             android:orientation="vertical"
             android:padding="20dp"
-            android:background="#ffffff"
-            android:elevation="5dp">
+            android:background="#ffffff">
 
             <EditText
                 android:layout_width="match_parent"
@@ -48,6 +47,34 @@
                 android:text="경로 선택"
                 android:id="@+id/btn_choose_path"
                 />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:background="#DDDDFF"
+            android:paddingLeft="20dp"
+            android:paddingVertical="5dp"
+            android:id="@+id/option_bar"
+            android:elevation="5dp">
+
+            <Button
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="검색 옵션"
+                android:textSize="10sp"
+                android:id="@+id/btn_dialog"
+                />
+
+            <TextView
+                android:id="@+id/Show_Time"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:textSize="15sp"
+                android:textColor="@color/black" />
 
         </LinearLayout>
 
