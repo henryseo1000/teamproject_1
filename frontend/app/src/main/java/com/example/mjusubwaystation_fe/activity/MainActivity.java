@@ -52,16 +52,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "channel_1_ID";
     private static final String CHANNEL_NAME = "channel_1";
-    private TextView output;
+    private TextView output, settings;
     public EditText startpoint_input, destination_input;
-    public Button find_path;
-    public Button swap_path;
-    public TextView settings;
+    public Button find_path, swap_path;
     public static String startpoint, destination;
     public static Call<RouteDTO> call;
     RouteDTO result;
-    float curX;  //눌린 곳의 X좌표
-    float curY;  //눌린 곳의 Y좌표
+    float curX, curY;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     @Override
@@ -165,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     int start, end;
                     start = Integer.parseInt(startpoint);
                     end = Integer.parseInt(destination);
-                    call = service1.getRouteData(start, end, "time", "16:30");
+                    call = service1.getRouteData(start, end, "time", "16:30");// 현재 시간을 디폴트로
                     call.enqueue(fun);
                 }
                 catch(Exception e) {
@@ -193,10 +190,15 @@ public class MainActivity extends AppCompatActivity {
             public void onPhotoTap(ImageView view, float x, float y) {
                 curX = x;  //눌린 곳의 X좌표
                 curY = y;  //눌린 곳의 Y좌표
+                int station = 0;
 
                 printString("손가락 눌림 : " + curX + ", " + curY);
-                mOnPopupClick();
+                if(curX < 0.346342447 && curX > 0.32620087 && curY < 0.06421511 && curY > 0.03996398){
+                    station = 210;
+                }
 
+                printString("손가락 눌림 : " + station);
+                mOnPopupClick(station);
             }
         });
 
@@ -258,11 +260,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //버튼
-    public void mOnPopupClick(){
+    //터치 시 팝업
+    public void mOnPopupClick(int station){
         Intent intent = new Intent(this, PathPopupActivity.class);
         intent.putExtra("X", curX);
         intent.putExtra("Y", curY);
+        intent.putExtra("station", station);
         startActivityForResult(intent, 1);
     }
 
