@@ -1,10 +1,13 @@
 package com.example.mjusubwaystation_fe.activity;
 import static android.content.ContentValues.TAG;
 
+import static java.sql.Types.NULL;
+
 import android.Manifest;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,6 +34,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TimePicker;
 
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.service.RouteDTO;
@@ -38,6 +42,7 @@ import com.example.mjusubwaystation_fe.service.TestDTO;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -52,16 +57,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "channel_1_ID";
     private static final String CHANNEL_NAME = "channel_1";
-    private TextView output;
+    private TextView output, settings;
     public EditText startpoint_input, destination_input;
-    public Button find_path;
-    public Button swap_path;
-    public TextView settings;
+    public Button find_path, swap_path;
     public static String startpoint, destination;
     public static Call<RouteDTO> call;
     RouteDTO result;
-    float curX;  //눌린 곳의 X좌표
-    float curY;  //눌린 곳의 Y좌표
+    float curX, curY;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     @Override
@@ -90,26 +92,14 @@ public class MainActivity extends AppCompatActivity {
         destination_input = (EditText) findViewById(R.id.edit_destination);
         settings = (TextView) findViewById(R.id.settings);
 
-        int permission = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.INTERNET);
-
-        int permission2 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
-        int permission3 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION);
-
-        // 권한이 열려있는지 확인
-        if (permission == PackageManager.PERMISSION_DENIED || permission2 == PackageManager.PERMISSION_DENIED || permission3 == PackageManager.PERMISSION_DENIED) {
-            // 마쉬멜로우 이상버전부터 권한을 물어본다
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // 권한 체크(READ_PHONE_STATE의 requestCode를 1000으로 세팅
-                requestPermissions(
-                        new String[]{Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                        1000);
+        FloatingActionButton fb = findViewById(R.id.fab);
+        fb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                startActivity(intent);
             }
-            return;
-        }
+        });
 
         Callback fun = new Callback<RouteDTO>() {
             @Override
@@ -165,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                     int start, end;
                     start = Integer.parseInt(startpoint);
                     end = Integer.parseInt(destination);
-                    call = service1.getRouteData(start, end, "time", "16:30");
+                    call = service1.getRouteData(start, end, "time", "16:30");// 현재 시간을 디폴트로
                     call.enqueue(fun);
                 }
                 catch(Exception e) {
@@ -193,45 +183,19 @@ public class MainActivity extends AppCompatActivity {
             public void onPhotoTap(ImageView view, float x, float y) {
                 curX = x;  //눌린 곳의 X좌표
                 curY = y;  //눌린 곳의 Y좌표
+                int station = 0;
 
                 printString("손가락 눌림 : " + curX + ", " + curY);
-                mOnPopupClick();
+                if(curX < 0.346342447 && curX > 0.32620087 && curY < 0.06421511 && curY > 0.03996398){
+                    station = 210;
+                }
 
+                printString("손가락 눌림 : " + station);
+                if(station != NULL) {
+                    mOnPopupClick(station);
+                }
             }
         });
-
-        /*photoView.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                curX = event.getX();  //눌린 곳의 X좌표
-                curY = event.getY();  //눌린 곳의 Y좌표
-
-                if(action == event.ACTION_DOWN) {   //처음 눌렸을 때
-                    printString("손가락 눌림 : " + curX + ", " + curY);
-                } else if(action == event.ACTION_MOVE) {    //누르고 움직였을 때
-                    printString("손가락 움직임 : " + curX + ", " + curY);
-
-                    ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
-                    smileX.start();
-
-                    ObjectAnimator smileY = ObjectAnimator.ofFloat(photoView, "translationY", previous_y, curY);
-                    smileY.start();
-
-                } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
-                    printString("손가락 뗌 : " + curX + ", " + curY);
-                    mOnPopupClick();
-                } else if(action == event.ACTION_POINTER_DOWN){
-
-                }
-                return true;
-            }
-
-            private void printString(String s) {
-                //좌표 출력
-                output.setText(s); //한 줄씩 추가
-            }
-
-        });*/
     }
 
     // 권한 체크 이후 로직
@@ -258,11 +222,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //버튼
-    public void mOnPopupClick(){
+    //터치 시 팝업
+    public void mOnPopupClick(int station){
         Intent intent = new Intent(this, PathPopupActivity.class);
         intent.putExtra("X", curX);
         intent.putExtra("Y", curY);
+        intent.putExtra("station", station);
         startActivityForResult(intent, 1);
     }
 
@@ -309,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(0, builder.build());
     }
 
-    public ArrayList toArrayList(LinkedList<Integer> path){
+    public static ArrayList toArrayList(LinkedList<Integer> path){
         ArrayList<String> path_list = new ArrayList<>();
 
         for(int i = 0; i < path.size(); i++) {
