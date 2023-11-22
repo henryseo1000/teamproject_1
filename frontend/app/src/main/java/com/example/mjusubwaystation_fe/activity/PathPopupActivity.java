@@ -7,20 +7,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.mjusubwaystation_fe.R;
 
 public class PathPopupActivity extends Activity {
-    TextView Title;
-    TextView Content;
-    TextView btn1;
+    private TextView Title, Content;
+    public Button time_table, set_as_start, set_as_dest;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_path_popup);
-        btn1 = (TextView) findViewById(R.id.btn1);
+        set_as_start = (Button) findViewById(R.id.set_as_start);
+        set_as_dest = (Button) findViewById(R.id.set_as_dest);
         Title = (TextView) findViewById(R.id.Title);
         Content = (TextView) findViewById(R.id.name);
 
@@ -35,9 +36,18 @@ public class PathPopupActivity extends Activity {
             Content.setText("" + station);
         }
 
-        btn1.setOnClickListener(new View.OnClickListener() {
+        set_as_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                MainActivity.startpoint_input.setText("" + MainActivity.station);
+                finish();
+            }
+        });
+
+        set_as_dest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.destination_input.setText("" + MainActivity.station);
                 finish();
             }
         });
