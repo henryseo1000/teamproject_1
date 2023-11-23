@@ -18,6 +18,7 @@ public class StationDTO {
     private int time;
     private int distance;
     private int expense;
+    private int line;
 
     private int result;
     private LinkedList<Integer> shortestPath;
@@ -29,6 +30,7 @@ public class StationDTO {
         stationDTO.setEnd(stationEntity.getEnd());
         stationDTO.setStart(stationEntity.getStart());
         stationDTO.setTime(stationEntity.getTime());
+        stationDTO.setLine(stationEntity.getLine());
         return stationDTO;
     }
 
@@ -38,6 +40,7 @@ public class StationDTO {
         stationDTO.setEnd(stationEntity.getEnd());
         stationDTO.setStart(stationEntity.getStart());
         stationDTO.setDistance(stationEntity.getDistance());
+        stationDTO.setLine(stationEntity.getLine());
         return stationDTO;
     }
 
@@ -47,8 +50,19 @@ public class StationDTO {
         stationDTO.setEnd(stationEntity.getEnd());
         stationDTO.setStart(stationEntity.getStart());
         stationDTO.setExpense(stationEntity.getExpense());
+        stationDTO.setLine(stationEntity.getLine());
         return stationDTO;
     }
+
+    public static StationDTO toStationDTOLine(StationEntity stationEntity) {
+        StationDTO stationDTO = new StationDTO();
+        stationDTO.setId(stationEntity.getId());
+        stationDTO.setEnd(stationEntity.getEnd());
+        stationDTO.setStart(stationEntity.getStart());
+        stationDTO.setLine(stationEntity.getLine());
+        return stationDTO;
+    }
+
     public static StationDTO setResult(int start, int end, int result, LinkedList<Integer> shortestPath, List<String> shortestTime){
         StationDTO stationDTO = new StationDTO();
         stationDTO.setStart(start);
@@ -58,4 +72,6 @@ public class StationDTO {
         stationDTO.setShortestTime(shortestTime);
         return stationDTO;
     }
+
+
 }

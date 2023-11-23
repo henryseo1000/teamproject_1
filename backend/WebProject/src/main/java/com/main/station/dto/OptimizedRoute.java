@@ -16,14 +16,18 @@ public class OptimizedRoute {
     private int result;
     private LinkedList<Integer> shortestPath;
     private List<String> shortestTime;
+    private List<Integer> totalLineList;
+    private int totalPrice;
 
-    public static OptimizedRoute setResult(int start, int end, int result, LinkedList<Integer> shortestPath, List<String> shortestTime){
+    public static OptimizedRoute setResult(int start, int end, int result, LinkedList<Integer> shortestPath, List<String> shortestTime, List<Integer> totalLineList, int totalPrice){
         OptimizedRoute optimizedRoute = new OptimizedRoute();
         optimizedRoute.setStart(start);
         optimizedRoute.setEnd(end);
         optimizedRoute.setResult(result);
         optimizedRoute.setShortestPath(shortestPath);
         optimizedRoute.setShortestTime(shortestTime);
+        optimizedRoute.setTotalLineList(totalLineList);
+        optimizedRoute.setTotalPrice(totalPrice);
         return optimizedRoute;
     }
 

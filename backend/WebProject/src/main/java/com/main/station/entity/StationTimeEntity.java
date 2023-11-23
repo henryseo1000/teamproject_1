@@ -17,13 +17,10 @@ public class StationTimeEntity {
 
     @Id
     private int time_id;
-
     @Column
     private int station_id;
     @Column
-    private String direction;
-    @Column
-    private int next_line;
+    private int direction;
     @Column
     private String start_time;
 
