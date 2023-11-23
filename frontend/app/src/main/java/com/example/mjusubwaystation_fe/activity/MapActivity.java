@@ -34,6 +34,8 @@ public class MapActivity extends AppCompatActivity implements MapView.CurrentLoc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        //RouteLineManager routeLineManager = kakaoMap.getRouteLineManager();
+
         /* 키 해시 얻기*/
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);

@@ -39,17 +39,14 @@ public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview;
     private Button choose_path, btn_dialog, find_path_retry;
     private EditText destination_input, startpoint_input;
-    private int alarmHour = 0, alarmMinute = 0;
-    private int time;
-    private int startpoint;
-    private int destination;
-    private int option = 0;
+    private int alarmHour = 0, alarmMinute = 0, time, option = 0, startpoint, destination;
     private ArrayList<String> shortest_path;
     private LinearLayout content;
     private ListView listview;
     private String[] filters = {"최소 시간", "최소 비용", "최소 환승"};
     AlertDialog.Builder builder;
     private TextView show_time;
+    private Call<RouteDTO> call;
 
 
     @Override
@@ -68,10 +65,12 @@ public class FindPathActivity extends AppCompatActivity {
         Callback fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
+
                 if (response.isSuccessful()) {
                     RouteDTO result = response.body();
                     shortest_path = MainActivity.toArrayList(result.getShortestPath());
-                    setPath(shortest_path);
+                    time = result.getResult();
+                    setContent();
                     Log.d(TAG, "성공 : \n" + result.toString());
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(FindPathActivity.this);
@@ -101,6 +100,7 @@ public class FindPathActivity extends AppCompatActivity {
         find_path_retry = (Button)findViewById(R.id.find_path_retry);
         startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
         destination_input = (EditText) findViewById(R.id.edit_destination);
+        choose_path = (Button)findViewById(R.id.btn_choose_path);
 
         show_time.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,11 +125,7 @@ public class FindPathActivity extends AppCompatActivity {
         startpoint_input.setText(Integer.toString(startpoint));
         destination_input.setText(Integer.toString(destination));
 
-        setPath(shortest_path);
-
-
-        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : " + time + "초\n약 " + toTime(time) + " 소요됩니다.");
-        choose_path = (Button)findViewById(R.id.btn_choose_path);
+        setContent();
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,15 +137,29 @@ public class FindPathActivity extends AppCompatActivity {
         find_path_retry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                keymanager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                String start = startpoint_input.getText().toString().replaceAll(" ", "");
-                String dest = destination_input.getText().toString().replaceAll(" ", "");
+                try {
+                    String startpoint_str = "";
+                    startpoint_str = startpoint_input.getText().toString().replaceAll(" ", "");
 
-                startpoint = Integer.parseInt(start);
-                destination = Integer.parseInt(dest);
+                    String destination_str = "";
+                    destination_str = destination_input.getText().toString().replaceAll(" ", "");
 
-                MainActivity.call = service1.getRouteData(startpoint, destination, "time", "16:30");// 현재 시간을 디폴트로
-                MainActivity.call.enqueue(fun);
+                    //Log.d(TAG,"시작점 : " + startpoint_str + " 도착점 : " + destination_str);
+
+                    startpoint = Integer.parseInt(startpoint_str);
+                    destination = Integer.parseInt(destination_str);
+
+                    call = service1.getRouteData(startpoint, destination, "time", "16:30");// 현재 시간을 디폴트로
+                    call.enqueue(fun);
+
+                    keymanager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+                catch(Exception e) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(FindPathActivity.this);
+                    builder.setMessage("출발역과 도착역 중 하나가 누락되었습니다! 다시 확인해주세요!");
+                    builder.setTitle("경고!");
+                    builder.show();
+                }
             }
         });
     }
@@ -197,5 +207,10 @@ public class FindPathActivity extends AppCompatActivity {
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    private void setContent(){
+        setPath(shortest_path);
+        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : " + time + "초\n약 " + toTime(time) + " 소요됩니다.");
     }
 }

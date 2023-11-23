@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     public static EditText startpoint_input, destination_input;
     public Button find_path, swap_path;
     public static String startpoint, destination;
-    public static Call<RouteDTO> call;
+    public Call<RouteDTO> call;
     RouteDTO result;
     float curX, curY;
     DrawerLayout drawerLayout;
@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPhotoTap(ImageView view, float x, float y) {
                 curX = x;  //눌린 곳의 X좌표
                 curY = y;  //눌린 곳의 Y좌표
+                station = NULL;
 
                 printString("손가락 눌림 : " + curX + ", " + curY);
                 if(curX < 0.346342447 && curX > 0.32620087 && curY < 0.06421511 && curY > 0.03996398){

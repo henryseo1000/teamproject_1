@@ -73,7 +73,9 @@
                 android:id="@+id/Show_Time"
                 android:layout_width="80dp"
                 android:layout_height="40dp"
-                android:textSize="15sp"
+                android:textSize="10sp"
+                android:layout_marginLeft="10dp"
+                android:text="출발 시간 설정"
                 android:textColor="@color/black" />
 
         </LinearLayout>
@@ -90,7 +92,6 @@
                     android:id="@+id/textView"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:text="TextView"
                     android:textSize="15sp"
                     android:textColor="@color/black"
                     tools:layout_editor_absoluteX="168dp"
