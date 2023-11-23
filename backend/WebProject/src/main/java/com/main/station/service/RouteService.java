@@ -130,8 +130,44 @@ public class RouteService {
 
         dijkstra(start, end);
         getShortestTime(shortestPath, time);
+        int total_price = getTotalPrice(shortestPath);
 
-        return OptimizedRoute.setResult(start,end,dist.get(end),shortestPath,shortestTime);
+        return OptimizedRoute.setResult(start,end,dist.get(end),shortestPath,shortestTime, total_price);
+    }
+
+    /**
+     * 최단 경로의 총 비용
+     * @param shortestPath
+     * @return totalPrice
+     */
+    private int getTotalPrice(LinkedList<Integer> shortestPath) {
+
+        int totalPrice = 0;
+        for(int i = 0; i < shortestPath.size() - 1; i++){
+            int start = shortestPath.get(i);
+            int end = shortestPath.get(i + 1);
+            String edgeKey = start + "-" + end; //현재 간선의 시작과 끝을 이용해 문자열 만듦
+            String reverseEdgeKey = end + "-" + start; // 간선 방향 뒤집은 문자열
+
+            // 현재 간선이나 역방향 간선이 이미 방문되었다면 해당 간선에 대한 처리 수행
+            if (visitedEdges.contains(edgeKey)) {
+                for (StationDTO stationDTO : findAll("expense")) {
+                    if (stationDTO.getStart() == start && stationDTO.getEnd() == end) {
+                        totalPrice += stationDTO.getExpense();
+                    }
+                }
+            } else if (visitedEdges.contains(reverseEdgeKey)) {
+                for (StationDTO stationDTO : findAll("expense")) {
+                    if (stationDTO.getStart() == end && stationDTO.getEnd() == start) {
+                        totalPrice += stationDTO.getExpense();
+                    }
+                }
+            }
+
+        }
+        System.out.println("get totalPrice = " + totalPrice);
+
+        return totalPrice;
     }
 
     private void dijkstra(int start, int end){
