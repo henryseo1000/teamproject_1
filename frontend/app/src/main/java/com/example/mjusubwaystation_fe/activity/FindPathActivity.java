@@ -25,9 +25,9 @@ import com.example.mjusubwaystation_fe.R;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.service.RouteDTO;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Date;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,14 +39,16 @@ public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview;
     private Button choose_path, btn_dialog, find_path_retry;
     private EditText destination_input, startpoint_input;
-    private int alarmHour = 0, alarmMinute = 0, time, option = 0, startpoint, destination;
+    private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
+    private String option = "최소시간";
     private ArrayList<String> shortest_path;
     private LinearLayout content;
     private ListView listview;
-    private String[] filters = {"최소 시간", "최소 비용", "최소 환승"};
-    AlertDialog.Builder builder;
+    private String[] filters = {"최소시간", "최소비용", "최단거리"};
+    private AlertDialog.Builder builder;
     private TextView show_time;
     private Call<RouteDTO> call;
+    private Date now;
 
 
     @Override
@@ -62,6 +64,8 @@ public class FindPathActivity extends AppCompatActivity {
 
         InputMethodManager keymanager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
 
+        now = new Date();
+
         Callback fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
@@ -69,7 +73,10 @@ public class FindPathActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     RouteDTO result = response.body();
                     shortest_path = MainActivity.toArrayList(result.getShortestPath());
-                    time = result.getResult();
+                    time = result.getTime();
+                    expense = result.getTotalPrice();
+                    transfer = result.getTransferCount();
+
                     setContent();
                     Log.d(TAG, "성공 : \n" + result.toString());
                 } else {
@@ -109,7 +116,9 @@ public class FindPathActivity extends AppCompatActivity {
                         (FindPathActivity.this, new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-
+                                now.setTime(hourOfDay);
+                                now.setMinutes(minute);
+                                Toast.makeText(getApplicationContext(), "설정된 시간은 : " + hourOfDay + "시 " + minute + "분입니다.", Toast.LENGTH_SHORT).show();
                             }
                         },alarmHour, alarmMinute, false);
                 timePickerDialog.show();
@@ -121,6 +130,8 @@ public class FindPathActivity extends AppCompatActivity {
         startpoint = intent.getIntExtra("startpoint", 0);
         destination = intent.getIntExtra("destination", 0);
         shortest_path = intent.getStringArrayListExtra("path");
+        expense = intent.getIntExtra("expense", 0);
+        transfer = intent.getIntExtra("transfer", 0);
 
         startpoint_input.setText(Integer.toString(startpoint));
         destination_input.setText(Integer.toString(destination));
@@ -149,7 +160,10 @@ public class FindPathActivity extends AppCompatActivity {
                     startpoint = Integer.parseInt(startpoint_str);
                     destination = Integer.parseInt(destination_str);
 
-                    call = service1.getRouteData(startpoint, destination, "time", "16:30");// 현재 시간을 디폴트로
+                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+                    String gettime = format.format(now);
+
+                    call = service1.getStationData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
                     call.enqueue(fun);
 
                     keymanager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -185,21 +199,20 @@ public class FindPathActivity extends AppCompatActivity {
 
     private void showDialog(){
         builder = new AlertDialog.Builder(this);
-
         builder.setTitle("검색 옵션을 선택하세요 : ");
 
         //다이얼로그에 리스트 담기
         builder.setItems(filters, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(filters[which].equals("최소 비용")){
-                    option = 1;
+                if(filters[which].equals("최소비용")){
+                    option = "최소비용";
                 }
-                if(filters[which].equals("최소 시간")){
-                    option = 2;
+                else if(filters[which].equals("최소시간")){
+                    option = "최소시간";
                 }
-                if(filters[which].equals("최소 환승")){
-                    option = 3;
+                else if(filters[which].equals("최단거리")){
+                    option = "최단거리";
                 }
                 Toast.makeText(getApplicationContext(), "다시 검색하시면 " + filters[which] + " 옵션으로 검색됩니다.", Toast.LENGTH_SHORT).show();
             }
@@ -211,6 +224,9 @@ public class FindPathActivity extends AppCompatActivity {
 
     private void setContent(){
         setPath(shortest_path);
-        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : " + time + "초\n약 " + toTime(time) + " 소요됩니다.");
+        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
+                + time + "초\n약 " + toTime(time) + " 소요됩니다."
+        + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
+
     }
 }
