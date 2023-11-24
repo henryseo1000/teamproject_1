@@ -33,4 +33,20 @@ public class TransferCalculate {
         return totalLineList;
     }
 
+    public int getTransferCount(List<Integer> totalLineList) {
+        int count=0;
+        //01234567
+        int comp = totalLineList.get(1);
+        for (int i=1;i<totalLineList.size();i=i+2){
+            int getLine = totalLineList.get(i);
+            if ( getLine ==0 ){
+                break;
+            }
+            if (comp != getLine){
+                count++;
+            }
+            comp = getLine;
+        }
+        return count;
+    }
 }

@@ -41,6 +41,14 @@ public class RouteService {
     }
 
 
+    public List<StationDTO> findAllType() {
+        List<StationEntity> stationEntityList = stationRepository.findAll();
+        List<StationDTO> stationDTOList = new ArrayList<>();
+        for (StationEntity stationEntity : stationEntityList) {
+            stationDTOList.add(StationDTO.toStationDTOAll(stationEntity));
+        }
+        return stationDTOList;
+    }
 
 
     public List<StationDTO> findAll(String type) {
@@ -94,7 +102,6 @@ public class RouteService {
     }
 
     public OptimizedRoute search(int start, int end, String type, String time) throws IOException {
-        //int e = stationRepository.countAllEdge();
         totalLineList = new ArrayList<>();
         System.out.println("time = " + time);
 
@@ -138,44 +145,18 @@ public class RouteService {
             }
 
         }
-
+        int transferCount=0;
 
         dijkstra(start, end);
-        int total_price = getTotalPrice(shortestPath);
+        List<Integer> totalList = getTotal();
         getTotalGapList(shortestPath);
-
         totalLineList = transferCalculate.getTransfer(shortestPath,stationDTOList);
+        transferCount = transferCalculate.getTransferCount(totalLineList);
         getShortestTime(totalLineList, time);
-        return OptimizedRoute.setResult(start,end,dist.get(end),shortestPath,shortestTime,totalLineList, total_price);
+        return OptimizedRoute.setResult(start,end,totalList.get(0), totalList.get(1), totalList.get(2),transferCount,shortestPath,shortestTime,totalLineList);
     }
 
-    private int getTotalPrice(LinkedList<Integer> shortestPath) {
 
-        int totalPrice = 0;
-        for (int i = 0; i < shortestPath.size() - 1; i++) {
-            int start = shortestPath.get(i);
-            int end = shortestPath.get(i + 1);
-            String edgeKey = start + "-" + end; //현재 간선의 시작과 끝을 이용해 문자열 만듦
-            String reverseEdgeKey = end + "-" + start; // 간선 방향 뒤집은 문자열
-
-            // 현재 간선이나 역방향 간선이 이미 방문되었다면 해당 간선에 대한 처리 수행
-            if (visitedEdges.contains(edgeKey)) {
-                for (StationDTO stationDTO : findAll("expense")) {
-                    if (stationDTO.getStart() == start && stationDTO.getEnd() == end) {
-                        totalPrice += stationDTO.getExpense();
-                    }
-                }
-            } else if (visitedEdges.contains(reverseEdgeKey)) {
-                for (StationDTO stationDTO : findAll("expense")) {
-                    if (stationDTO.getStart() == end && stationDTO.getEnd() == start) {
-                        totalPrice += stationDTO.getExpense();
-                    }
-                }
-            }
-
-        }
-        return totalPrice;
-    }
     private void getTotalGapList(LinkedList<Integer> shortestPath) {
 
         stationGap = new ArrayList<>();
@@ -194,6 +175,28 @@ public class RouteService {
         stationGap.add(shortestPath.get(i));
         stationGap.add(0);
 
+    }
+
+    private List<Integer> getTotal() {
+        List<Integer> totalList = new ArrayList<>();
+        int time=0, distance=0, expense=0;
+        for (int i = 0; i < shortestPath.size() - 1; i++) {
+
+            int start = shortestPath.get(i);
+            int end = shortestPath.get(i + 1);
+            for (StationDTO stationDTO : findAllType()) {
+                int compA = stationDTO.getStart(); int compB =  stationDTO.getEnd();
+                if ( (compA==start && compB== end) || (compA==end && compB==start)) {
+                    time += stationDTO.getTime();
+                    distance += stationDTO.getDistance();
+                    expense += stationDTO.getExpense();
+                }
+            }
+        }
+        totalList.add(time);
+        totalList.add(distance);
+        totalList.add(expense);
+        return totalList;
     }
 
     private void dijkstra(int start, int end){
