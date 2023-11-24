@@ -18,7 +18,8 @@
             android:layout_height="230dp"
             android:orientation="vertical"
             android:padding="20dp"
-            android:background="#ffffff">
+            android:background="#ffffff"
+            android:elevation="5dp">
 
             <EditText
                 android:layout_width="match_parent"
@@ -57,8 +58,7 @@
             android:background="#DDDDFF"
             android:paddingLeft="20dp"
             android:paddingVertical="5dp"
-            android:id="@+id/option_bar"
-            android:elevation="5dp">
+            android:id="@+id/option_bar">
 
             <Button
                 android:layout_width="80dp"
@@ -73,7 +73,9 @@
                 android:id="@+id/Show_Time"
                 android:layout_width="80dp"
                 android:layout_height="40dp"
-                android:textSize="15sp"
+                android:textSize="10sp"
+                android:layout_marginLeft="10dp"
+                android:text="출발 시간 설정"
                 android:textColor="@color/black" />
 
         </LinearLayout>
@@ -83,14 +85,14 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:background="#ffffff"
-                android:padding="20dp"
                 android:id="@+id/content">
 
                 <TextView
                     android:id="@+id/textView"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:text="TextView"
+                    android:layout_height="80dp"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="10dp"
                     android:textSize="15sp"
                     android:textColor="@color/black"
                     tools:layout_editor_absoluteX="168dp"

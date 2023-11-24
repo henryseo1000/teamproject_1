@@ -59,17 +59,17 @@
         android:layout_height="75dp"
         android:orientation="horizontal"
         android:backgroundTint="@color/white"
-        android:padding="10dp">
+        android:padding="15dp">
 
         <Button
             android:id="@+id/time_table"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="45dp"
             android:gravity="center"
-            android:textSize="20sp"
+            android:textSize="15sp"
             android:text="시간표 조회"
-            android:paddingHorizontal="10dp"
             android:backgroundTint="#FF6200EE"
+            android:background="@drawable/button_round"
             />
 
     </LinearLayout>
@@ -85,14 +85,15 @@
             android:layout_width="160dp"
             android:layout_height="75dp"
             android:gravity="center"
-            android:paddingRight="10dp">
+            android:paddingRight="20dp"
+            android:paddingBottom="10dp">
 
             <Button
-                android:id="@+id/btn1"
+                android:id="@+id/set_as_start"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="45dp"
                 android:gravity="center"
-                android:textSize="20sp"
+                android:textSize="15sp"
                 android:text="출발역으로 설정"
                 android:textColor="@color/black"
                 android:background="@drawable/button_round" />
@@ -103,14 +104,15 @@
             android:layout_width="160dp"
             android:layout_height="75dp"
             android:gravity="center"
-            android:paddingLeft="10dp">
+            android:paddingLeft="20dp"
+            android:paddingBottom="10dp">
 
             <Button
-                android:id="@+id/btn2"
+                android:id="@+id/set_as_dest"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="45dp"
                 android:gravity="center"
-                android:textSize="20sp"
+                android:textSize="15sp"
                 android:text="도착역으로 설정"
                 android:textColor="@color/black"
                 android:background="@drawable/button_round"/>
