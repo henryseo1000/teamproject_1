@@ -11,5 +11,4 @@ import java.util.List;
 @AllArgsConstructor
 public class SpecificStation {
     private List<List<Integer>> surroundStationList;
-
 }

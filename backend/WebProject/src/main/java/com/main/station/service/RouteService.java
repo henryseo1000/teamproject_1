@@ -75,23 +75,18 @@ public class RouteService {
         shortestTime = new ArrayList<>();
         List<StationTimeEntity> stationTimeEntityList = stationTimeRepository.findAll();
 
-        System.out.println("stationGap = " + stationGap);
         String compareTime = now_time;
-        System.out.println("totalLineList = " + totalLineList);
         List<StationTimeDTO> stationTimeList =findAllTime(stationTimeEntityList);
         for(int i=0;i<totalLineList.size();i=i+2){
             int station = totalLineList.get(i);
             int line = totalLineList.get(i+1);
             int gap = stationGap.get(i+1);
-            System.out.println("========station이 " + station+"일때 ///"+"Line이 "+line+"일때======= ");
             for(StationTimeDTO stationTimeDTO : stationTimeList){
                 String start_time = stationTimeDTO.getStart_time();
                 if ( (stationTimeDTO.getDirection() == line) && (stationTimeDTO.getStation_id() == station) && (start_time.compareTo(compareTime) > 0) ){
-                    System.out.println("추가할 시간 = " + stationTimeDTO.getStart_time());
                     shortestTime.add(start_time);
                     compareTime = addSecondsToTime(start_time, gap);
                     shortestTime.add(compareTime);
-                    System.out.println("기준시간 변경 = " + compareTime);
                     break;
                 }
             }

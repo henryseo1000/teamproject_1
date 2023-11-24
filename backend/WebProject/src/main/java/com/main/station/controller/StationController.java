@@ -1,12 +1,10 @@
 package com.main.station.controller;
 
-import com.main.station.dto.AlarmDTO;
-import com.main.station.dto.OptimizedRoute;
-import com.main.station.dto.SpecificStation;
-import com.main.station.dto.StationDTO;
+import com.main.station.dto.*;
 import com.main.station.service.AlarmService;
 import com.main.station.service.RouteService;
 import com.main.station.service.StationInfoService;
+import com.main.station.service.StationTimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,6 +24,7 @@ public class StationController {
 
     private final StationInfoService stationInfoService;
     private final RouteService routeService;
+    private final StationTimeService stationTimeService;
     private final AlarmService alarmService;
     private OptimizedRoute optimizedRoute_;
 
@@ -113,6 +112,23 @@ public class StationController {
         specificStation = stationInfoService.getInfo(station);
         System.out.println("specificStation = " + specificStation);
         return new ResponseEntity<>(specificStation, HttpStatus.OK);
+    }
+
+    
+    
+    @Operation(summary = "특정 역 시간표 가져오기", description = "특정 역의 시간표를 가져온다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "400", description = "Bad Request")
+    })
+    @GetMapping("/StationTimeInfo")
+    public ResponseEntity<List<StationTimeDTO>> selectStationTime(@RequestParam int station) throws IOException {
+        List<StationTimeDTO> stationTimeDTOList;
+        stationTimeDTOList = stationTimeService.getTimeInfo(station);
+        System.out.println("stationTimeDTOList = " + stationTimeDTOList);
+        return new ResponseEntity<>(stationTimeDTOList, HttpStatus.OK);
     }
 
 }
