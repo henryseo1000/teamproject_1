@@ -285,9 +285,206 @@ public class MainActivity extends AppCompatActivity {
         else if(curX > 0.1443925 && curY > 0.92981267 && curX < 0.16430014 && curY < 0.95506257){
             station = 107;
         }
-        else if(curX > 0.32620087 && curY > 0.03996398 && curX < 0.346342447 && curY < 0.06421511){
+        else if(curX > 0.19682889 && curY > 0.9255692 && curX < 0.2206326 && curY < 0.95933104){
+            station = 108;
+        }
+        else if(curX > 0.24999923 && curY > 0.9255692 && curX < 0.27619204 && curY < 0.95933104){
+            station = 109;
+        }
+        else if(curX > 0.32221255 && curY > 0.91995144 && curX < 0.34999225 && curY < 0.96157825){
+            station = 110;
+        }
+        else if(curX > 0.39681494 && curY > 0.9188275 && curX < 0.42459464 && curY < 0.96382546){
+            station = 111;
+        }
+        else if(curX > 0.4682435 && curY > 0.92107475 && curX < 0.49680796 && curY < 0.96157825){
+            station = 112;
+        }
+        else if(curX > 0.55872434 && curY > 0.915457 && curX < 0.58252805 && curY < 0.9570838){
+            station = 113;
+        }
+        else if(curX > 0.5928517 && curY > 0.84354633 && curX < 0.6190271 && curY < 0.8783778){
+            station = 114;
+        }
+        else if(curX > 0.59363645 && curY > 0.75590515 && curX < 0.6166554 && curY < 0.7918606){
+            station = 115;
+        }
+        else if(curX > 0.5928517 && curY > 0.6288844 && curX < 0.6190271 && curY < 0.6682103){
+            station = 116;
+        }
+        else if(curX > 0.5912474 && curY > 0.56371534 && curX < 0.6190271 && curY < 0.5929291){
+            station = 117;
+        }
+        else if(curX > 0.5817259 && curY > 0.45472544 && curX < 0.6071339 && curY < 0.4850631){
+            station = 118;
+        }
+        else if(curX > 0.47460046 && curY > 0.42433462 && curX < 0.4999911 && curY < 0.46146715){
+            station = 119;
+        }
+        else if(curX > 0.39841115 && curY > 0.42658183 && curX < 0.42221487 && curY < 0.46259102){
+            station = 120;
+        }
+        else if(curX > 0.32657295 && curY > 0.42433468 && curX < 0.35196358 && curY < 0.46259093){
+            station = 121;
+        }
+        else if(curX > 0.2527553 && curY > 0.42770576 && curX < 0.27736118 && curY < 0.46371427){
+            station = 122;
+        }
+        else if(curX > 0.14006697 && curY > 0.4232113 && curX < 0.16545759 && curY < 0.46371433){
+            station = 123;
+        }
+
+        else if(curX > 0.03292411 && curY > 0.34455907 && curX < 0.062290736 && curY < 0.3782672){
+            station = 201;
+        }
+        else if(curX > 0.036097936 && curY > 0.26703003 && curX < 0.06070382 && curY < 0.3018621){
+            station = 202;
+        }
+        else if(curX > 0.03690011 && curY > 0.19287223 && curX < 0.061506 && curY < 0.22320975){
+            station = 203;
+        }
+        else if(curX > 0.03292411 && curY > 0.111919485 && curX < 0.06070382 && curY < 0.14562762){
+            station = 204;
+        }
+        else if(curX > 0.03768485 && curY > 0.035514362 && curX < 0.061506 && curY < 0.070345856){
+            station = 205;
+        }
+        else if(curX > 0.088483535 && curY > 0.033267155 && curX < 0.112287246 && curY < 0.07259306){
+            station = 206;
+        }
+        else if(curX > 0.1408517 && curY > 0.0355144 && curX < 0.16467285 && curY < 0.071469694){
+            station = 207;
+        }
+        else if(curX > 0.19641113 && curY > 0.037761606 && curX < 0.2194301 && curY < 0.0737169){
+            station = 208;
+        }
+        else if(curX > 0.2527553 && curY > 0.033267193 && curX < 0.27736118 && curY < 0.07034582){
+            station = 209;
+        }
+        else if(curX > 0.32498604 && curY > 0.029896103 && curX < 0.34640068 && curY < 0.06922249){
             station = 210;
         }
+        else if(curX > 0.47576535 && curY > 0.0355144 && curX < 0.501156 && curY < 0.071469694){
+            station = 211;
+        }
+        else if(curX > 0.5440201 && curY > 0.029896103 && curX < 0.5678238 && curY < 0.06922249){
+            station = 212;
+        }
+        else if(curX > 0.39841115 && curY > 0.42658183 && curX < 0.42221487 && curY < 0.46259102){
+            station = 213;
+        }
+        else if(curX > 0.6983802 && curY > 0.0388849 && curX < 0.7237708 && curY < 0.073716946){
+            station = 214;
+        }
+        else if(curX > 0.7642458 && curY > 0.036637694 && curX < 0.78726476 && curY < 0.077087484){
+            station = 215;
+        }
+        else if(curX > 0.82615286 && curY > 0.033267155 && curX < 0.8523457 && curY < 0.070345856){
+            station = 216;
+        }
+        else if(curX > 0.9360875 && curY > 0.033267155 && curX < 0.9614781 && curY < 0.069222525){
+            station = 217;
+        }
+
+        else if(curX > 0.13933726 && curY > 0.11304282 && curX < 0.16551262 && curY < 0.14338036){
+            station = 301;
+        }
+        else if(curX > 0.13775034 && curY > 0.19287217 && curX < 0.16472788 && curY < 0.22545697){
+            station = 302;
+        }
+        else if(curX > 0.14092417 && curY > 0.27264833 && curX < 0.16551262 && curY < 0.30635652){
+            station = 303;
+        }
+        else if(curX > 0.13933726 && curY > 0.3490534 && curX < 0.16551262 && curY < 0.3827616){
+            station = 304;
+        }
+        else if(curX > 0.14249365 && curY > 0.5637154 && curX < 0.17027336 && curY < 0.5974235){
+            station = 305;
+        }
+        else if(curX > 0.14090674 && curY > 0.6637159 && curX < 0.16629736 && curY < 0.69747776){
+            station = 306;
+        }
+        else if(curX > 0.14249365 && curY > 0.7570285 && curX < 0.16629736 && curY < 0.79298383){
+            station = 307;
+        }
+        else if(curX > 0.14329582 && curY > 0.8536585 && curX < 0.16947119 && curY < 0.88399607){
+            station = 308;
+        }
+
+        else if(curX > 0.089268275 && curY > 0.7559052 && curX < 0.11308943 && curY < 0.7941077){
+            station = 401;
+        }
+        else if(curX > 0.1972133 && curY > 0.7570285 && curX < 0.22180176 && curY < 0.7941077){
+            station = 402;
+        }
+        else if(curX > 0.2527553 && curY > 0.7570285 && curX < 0.2789481 && curY < 0.79298383){
+            station = 403;
+        }
+        else if(curX > 0.32657295 && curY > 0.753658 && curX < 0.34959194 && curY < 0.7918605){
+            station = 404;
+        }
+        else if(curX > 0.3987948 && curY > 0.75478137 && curX < 0.4225985 && curY < 0.7941077){
+            station = 405;
+        }
+        else if(curX > 0.4733972 && curY > 0.753658 && curX < 0.49959 && curY < 0.79298383){
+            station = 406;
+        }
+        else if(curX > 0.5345021 && curY > 0.7547813 && curX < 0.559108 && curY < 0.79410774){
+            station = 407;
+        }
+        else if(curX > 0.6424471 && curY > 0.7547813 && curX < 0.6654661 && curY < 0.79523104){
+            station = 408;
+        }
+        else if(curX > 0.6976105 && curY > 0.7570285 && curX < 0.72219896 && curY < 0.7929839){
+            station = 409;
+        }
+        else if(curX > 0.7642609 && curY > 0.75590515 && curX < 0.789669 && curY < 0.79410774){
+            station = 410;
+        }
+        else if(curX > 0.8257708 && curY > 0.7559052 && curX < 0.85274833 && curY < 0.7907366){
+            station = 411;
+        }
+        else if(curX > 0.82498604 && curY > 0.6277605 && curX < 0.8511614 && curY < 0.6704575){
+            station = 412;
+        }
+        else if(curX > 0.8241839 && curY > 0.5625915 && curX < 0.8511614 && curY < 0.60191786){
+            station = 413;
+        }
+        else if(curX > 0.82657295 && curY > 0.4513549 && curX < 0.8535505 && curY < 0.48731023){
+            station = 414;
+        }
+        else if(curX > 0.82498604 && curY > 0.34568238 && curX < 0.85274833 && curY < 0.38276154){
+            station = 415;
+        }
+        else if(curX > 0.8273577 && curY > 0.27040118 && curX < 0.8511614 && curY < 0.3074798){
+            station = 416;
+        }
+        else if(curX > 0.82657295 && curY > 0.13214436 && curX < 0.85037667 && curY < 0.1714702){
+            station = 417;
+        }
+
+        else if(curX > 0.25158536 && curY > 0.10967223 && curX < 0.28016725 && curY < 0.1433804){
+            station = 501;
+        }
+        else if(curX > 0.25238755 && curY > 0.19287217 && curX < 0.27858034 && curY < 0.22545701){
+            station = 502;
+        }
+        else if(curX > 0.25238755 && curY > 0.27264833 && curX < 0.27777818 && curY < 0.30298543){
+            station = 503;
+        }
+        else if(curX > 0.25158536 && curY > 0.34568232 && curX < 0.27858034 && curY < 0.38051432){
+            station = 504;
+        }
+        else if(curX > 0.24841154 && curY > 0.5614681 && curX < 0.27619126 && curY < 0.59629965){
+            station = 505;
+        }
+        else if(curX > 0.25158536 && curY > 0.6603453 && curX < 0.27858034 && curY < 0.6929834){
+            station = 506;
+        }
+        else if(curX > 0.25238755 && curY > 0.8502879 && curX < 0.28016725 && curY < 0.88511944){
+            station = 507;
+        }
+
         else {
             station = NULL;
         }
