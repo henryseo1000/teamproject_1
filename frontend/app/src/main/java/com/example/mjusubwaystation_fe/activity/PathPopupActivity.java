@@ -12,8 +12,11 @@ import android.widget.TextView;
 
 import com.example.mjusubwaystation_fe.R;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class PathPopupActivity extends Activity {
-    private TextView Title, Content;
+    private TextView Title, Content, Prev, Next;
     public Button time_table, set_as_start, set_as_dest;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,11 +27,19 @@ public class PathPopupActivity extends Activity {
         set_as_dest = (Button) findViewById(R.id.set_as_dest);
         Title = (TextView) findViewById(R.id.Title);
         Content = (TextView) findViewById(R.id.name);
+        Prev = (TextView) findViewById(R.id.Prev);
+        Next = (TextView) findViewById(R.id.Next);
 
         Intent intent = getIntent();
         float dataX = intent.getFloatExtra("X", 0);
         float dataY = intent.getFloatExtra("Y", 0);
-        Title.setText("터치 이벤트가 호출되었습니다!");
+        ArrayList<Integer> line_list = intent.getIntegerArrayListExtra("lines");
+        String line = "| ";
+
+        for(int i = 0; i < line_list.size(); i++){
+            line += line_list.get(i) + "호선 | ";
+        }
+        Title.setText(line);
 
         int station = intent.getIntExtra("station", 0);
 
