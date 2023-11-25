@@ -1,38 +1,44 @@
 package com.example.mjusubwaystation_fe.activity;
 import static android.content.ContentValues.TAG;
 
-import android.Manifest;
+import static java.sql.Types.NULL;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
 import com.example.mjusubwaystation_fe.R;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.service.RouteDTO;
-import com.example.mjusubwaystation_fe.service.TestDTO;
+import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,66 +47,74 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String CHANNEL_ID = "channel_1_ID";
-    private static final String CHANNEL_NAME = "channel_1";
-    private TextView output;
-    public EditText startpoint_input, destination_input;
-    public Button find_path;
-    //public Button btn;
+    private static final String CHANNEL_ID = "channel_1_ID", CHANNEL_NAME = "channel_1";
+    private TextView output, settings;
+    public static int station = 0;
+    public static EditText startpoint_input, destination_input;
+    public Button find_path, swap_path;
     public static String startpoint, destination;
-    public static Call<TestDTO> call2;
-    public static Call<RouteDTO> call;
-    RouteDTO result;
+    public Call<RouteDTO> call;
+    private RouteDTO result;
+    float curX, curY;
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
+    Date now;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        drawerLayout = (DrawerLayout)findViewById(R.id.main_screen);
+        navigationView = (NavigationView)findViewById(R.id.navigation_view);
         PhotoView photoView = findViewById(R.id.photoView);
         photoView.setImageResource(R.drawable.image4);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/")
+                .baseUrl("http://43.202.63.57:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         RetrofitInterface service1 = retrofit.create(RetrofitInterface.class);
+        PhotoViewAttacher attacher = new PhotoViewAttacher(photoView);
 
         // 위젯에 대한 참조.
-        output = (TextView) findViewById(R.id.tv_outPut);
-        find_path = (Button) findViewById(R.id.btn_login);
-        startpoint_input = (EditText) findViewById(R.id.edit_email);
-        destination_input = (EditText) findViewById(R.id.edit_password);
+        output = (TextView) findViewById(R.id.output);
+        find_path = (Button) findViewById(R.id.find_path);
+        swap_path = (Button) findViewById(R.id.swap);
+        startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
+        destination_input = (EditText) findViewById(R.id.edit_destination);
+        settings = (TextView) findViewById(R.id.settings);
 
-        int permission = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.INTERNET);
-
-        int permission2 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
-        int permission3 = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION);
-
-        // 권한이 열려있는지 확인
-        if (permission == PackageManager.PERMISSION_DENIED || permission2 == PackageManager.PERMISSION_DENIED || permission3 == PackageManager.PERMISSION_DENIED) {
-            // 마쉬멜로우 이상버전부터 권한을 물어본다
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // 권한 체크(READ_PHONE_STATE의 requestCode를 1000으로 세팅
-                requestPermissions(
-                        new String[]{Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                        1000);
+        FloatingActionButton fb = findViewById(R.id.fab);
+        fb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                startActivity(intent);
             }
-            return;
-        }
+        });
 
         Callback fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
                     result = response.body();
+                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
+                    intent.putExtra("startpoint", result.getStart());
+                    intent.putExtra("destination", result.getEnd());
+                    intent.putExtra("time", result.getTime());
+                    intent.putExtra("path", toArrayList(result.getShortestPath()));
+                    intent.putExtra("expense", result.getTotalPrice());
+                    intent.putExtra("transfer", result.getTransferCount());
+
+                    startActivity(intent);
                     Log.d(TAG, "성공 : \n" + result.toString());
                 }
                 else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage(startpoint + "또는 " + destination + "은(는) 노선도에 존재하지 않습니다. 노선도를 다시 확인해주세요.");
+                    builder.setTitle("잘못된 경로입니다!");
+                    builder.show();
                     Log.d(TAG, "실패 : \n");
                 }
             }
@@ -111,35 +125,46 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        find_path.setOnClickListener(new View.OnClickListener() {
+        swap_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
                 startpoint = startpoint_input.getText().toString();
                 destination = destination_input.getText().toString();
 
-                startpoint = startpoint.replaceAll(" ", "");
-                destination = destination.replaceAll(" ", "");
+                startpoint_input.setText(destination);
+                destination_input.setText(startpoint);
+            }
+        });
 
-                int start, end;
-                start = Integer.parseInt(startpoint);
-                end = Integer.parseInt(destination);
-                call = service1.getRouteData(start,end, "time", "16:30");
-                call.enqueue(fun);
+        find_path.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
+                    startpoint = startpoint_input.getText().toString();
+                    destination = destination_input.getText().toString();
 
-                if(result != null) {
-                    Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
-                    intent.putExtra("response", result.toString());
-                    startActivity(intent);
+                    startpoint = startpoint.replaceAll(" ", "");
+                    destination = destination.replaceAll(" ", "");
+
+                    int start, end;
+                    start = Integer.parseInt(startpoint);
+                    end = Integer.parseInt(destination);
+
+                    now = new Date();
+                    Log.d(TAG, "" + now.toString());
+
+                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+                    String gettime = format.format(now);
+
+                    //Log.d(TAG, "버튼을 누른 시점 : " + gettime);
+
+                    call = service1.getStationData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
+                    call.enqueue(fun);
                 }
-                else if (!startpoint.equals("")){
+                catch(Exception e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage( startpoint + "은(는) 노선도에 존재하지 않습니다!");
-                    builder.setTitle("잘못된 경로입니다!");
-                    builder.show();
-                }
-                else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    Log.d(TAG, e.getMessage());
                     builder.setMessage("출발역과 도착역 중 하나가 누락되었습니다! 다시 확인해주세요!");
                     builder.setTitle("경고!");
                     builder.show();
@@ -147,67 +172,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        photoView.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                float curX = event.getX();  //눌린 곳의 X좌표
-                float curY = event.getY();  //눌린 곳의 Y좌표
-
-                if(action == event.ACTION_DOWN) {   //처음 눌렸을 때
-                    printString("손가락 눌림 : " + curX + ", " + curY);
-                } else if(action == event.ACTION_MOVE) {    //누르고 움직였을 때
-                    printString("손가락 움직임 : " + curX + ", " + curY);
-
-                    /*ObjectAnimator smileX = ObjectAnimator.ofFloat(photoView, "translationX", previous_x, curX);
-                    smileX.start();
-
-                    ObjectAnimator smileY = ObjectAnimator.ofFloat(photoView, "translationY", previous_y, curY);
-                    smileY.start();*/
-
-                } else if(action == event.ACTION_UP) {    //누른걸 뗐을 때
-                    printString("손가락 뗌 : " + curX + ", " + curY);
-                } else if(action == event.ACTION_POINTER_DOWN){
-
-                }
-                return true;
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
             }
+        });
 
+        attacher.setOnPhotoTapListener(new OnPhotoTapListener() {
             private void printString(String s) {
                 //좌표 출력
                 output.setText(s); //한 줄씩 추가
             }
+            @Override
+            public void onPhotoTap(ImageView view, float x, float y) {
+                curX = x;  //눌린 곳의 X좌표
+                curY = y;  //눌린 곳의 Y좌표
+                station = NULL;
 
+                pressed_location(curX, curY);
+
+                printString("손가락 눌림 : " + curX + ", " + curY);
+                Log.d(TAG,"손가락 눌림 : " + curX + ", " + curY);
+                if(station != NULL) {
+                    mOnPopupClick(station);
+                }
+            }
         });
     }
 
-    // 권한 체크 이후 로직
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grandResults) {
-        // READ_PHONE_STATE의 권한 체크 결과를 불러온다
-        super.onRequestPermissionsResult(requestCode, permissions, grandResults);
-        if (requestCode == 1000) {
-            boolean check_result = true;
-
-            // 모든 퍼미션을 허용했는지 체크
-            for (int result : grandResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    check_result = false;
-                    break;
-                }
-            }
-
-            // 권한 체크에 동의를 하지 않으면 안드로이드 종료
-            if (check_result == false) {
-                finish();
-            }
-        }
-
-    }
-
-    //버튼
-    public void mOnPopupClick(View v){
+    //터치 시 팝업
+    public void mOnPopupClick(int station){
         Intent intent = new Intent(this, PathPopupActivity.class);
-        intent.putExtra("data", "Test Popup");
+        intent.putExtra("X", curX);
+        intent.putExtra("Y", curY);
+        intent.putExtra("station", station);
         startActivityForResult(intent, 1);
     }
 
@@ -220,6 +219,15 @@ public class MainActivity extends AppCompatActivity {
                 String result = data.getStringExtra("result");
                 output.setText(result);
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() { //뒤로가기 했을 때
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -243,6 +251,46 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentText(message);
 
         notificationManager.notify(0, builder.build());
+    }
+
+    public static ArrayList toArrayList(LinkedList<Integer> path){
+        ArrayList<String> path_list = new ArrayList<>();
+
+        for(int i = 0; i < path.size(); i++) {
+            path_list.add(path.get(i).toString());
+        }
+
+        return path_list;
+    }
+
+    public static void pressed_location(float curX, float curY){
+        if(curX > 0.038879395 && curY > 0.4860061 && curX < 0.056935627 && curY < 0.5073234){ // 101
+            station = 101;
+        }
+        else if(curX > 0.037953693 && curY > 0.5718994 && curX < 0.056247063 && curY < 0.5938825){
+            station = 102;
+        }
+        else if(curX > 0.037722893 && curY > 0.6705997 && curX < 0.056247063 && curY < 0.69057494){
+            station = 103;
+        }
+        else if(curX > 0.03888256 && curY > 0.7613932 && curX < 0.05717276 && curY < 0.78564435){
+            station = 104;
+        }
+        else if(curX > 0.03749593 && curY > 0.86030537 && curX < 0.058095295 && curY < 0.8832768){
+            station = 105;
+        }
+        else if(curX > 0.06874593 && curY > 0.92784643 && curX < 0.0893453 && curY < 0.9524097){
+            station = 106;
+        }
+        else if(curX > 0.1443925 && curY > 0.92981267 && curX < 0.16430014 && curY < 0.95506257){
+            station = 107;
+        }
+        else if(curX > 0.32620087 && curY > 0.03996398 && curX < 0.346342447 && curY < 0.06421511){
+            station = 210;
+        }
+        else {
+            station = NULL;
+        }
     }
 
 }

@@ -1,0 +1,10 @@
+<resources>
+    <array name="route_images">
+        <item>@drawable/route1</item>
+        <item>@drawable/route2</item>
+        <item>@drawable/route3</item>
+        <item>@drawable/route4</item>
+        <item>@drawable/route5</item>
+        <!-- 나머지 이미지들도 동일하게 추가 -->
+    </array>
+</resources>
