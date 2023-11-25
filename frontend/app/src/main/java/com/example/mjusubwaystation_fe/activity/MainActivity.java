@@ -29,14 +29,17 @@ import android.widget.EditText;
 
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.service.RouteDTO;
+import com.example.mjusubwaystation_fe.service.StationDTO;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import java.sql.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -53,12 +56,18 @@ public class MainActivity extends AppCompatActivity {
     public static EditText startpoint_input, destination_input;
     public Button find_path, swap_path;
     public static String startpoint, destination;
-    public Call<RouteDTO> call;
-    private RouteDTO result;
+    public Call<RouteDTO> getPath;
+    public Call<StationDTO> getStationInfo;
+    private RouteDTO path_result;
+    private StationDTO station_result;
     float curX, curY;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Date now;
+    RetrofitInterface service1;
+    Callback path_fun, station_fun;
+    private ArrayList<Integer> stationlines;
+    private int[] surroundstation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        RetrofitInterface service1 = retrofit.create(RetrofitInterface.class);
+        service1 = retrofit.create(RetrofitInterface.class);
         PhotoViewAttacher attacher = new PhotoViewAttacher(photoView);
 
         // 위젯에 대한 참조.
@@ -94,21 +103,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Callback fun = new Callback<RouteDTO>() {
+        path_fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
-                    result = response.body();
+
+                    path_result = response.body();
+                    Log.d(TAG, "성공 : \n" + path_result.toString());
+
                     Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
-                    intent.putExtra("startpoint", result.getStart());
-                    intent.putExtra("destination", result.getEnd());
-                    intent.putExtra("time", result.getTime());
-                    intent.putExtra("path", toArrayList(result.getShortestPath()));
-                    intent.putExtra("expense", result.getTotalPrice());
-                    intent.putExtra("transfer", result.getTransferCount());
+                    intent.putExtra("startpoint", path_result.getStart());
+                    intent.putExtra("destination", path_result.getEnd());
+                    intent.putExtra("time", path_result.getTime());
+                    intent.putExtra("path", toArrayList(path_result.getShortestPath()));
+                    intent.putExtra("expense", path_result.getTotalPrice());
+                    intent.putExtra("transfer", path_result.getTransferCount());
 
                     startActivity(intent);
-                    Log.d(TAG, "성공 : \n" + result.toString());
                 }
                 else{
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -121,6 +132,32 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<RouteDTO> call, Throwable t) {
+                Log.d(TAG, "onFailure : " + t.getMessage());
+            }
+        };
+
+        station_fun = new Callback<StationDTO>() {
+            @Override
+            public void onResponse(Call<StationDTO> call, Response<StationDTO> response) {
+                if(response.isSuccessful()){
+                    station_result = response.body();
+                    stationlines = getline(station_result);
+
+                    mOnPopupClick(station);
+                    Log.d(TAG, "각 호선은 : " + stationlines.toString());
+                    Log.d(TAG, "성공 : \n" + station_result.getSurroundStationList().toString());
+                }
+                else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage("서버와 통신 중 오류가 발생했습니다.");
+                    builder.setTitle("서버 통신 오류");
+                    builder.show();
+                    Log.d(TAG, "실패 : \n");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StationDTO> call, Throwable t) {
                 Log.d(TAG, "onFailure : " + t.getMessage());
             }
         };
@@ -159,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
 
                     //Log.d(TAG, "버튼을 누른 시점 : " + gettime);
 
-                    call = service1.getStationData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
-                    call.enqueue(fun);
+                    getPath = service1.getPathData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
+                    getPath.enqueue(path_fun);
                 }
                 catch(Exception e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -194,8 +231,10 @@ public class MainActivity extends AppCompatActivity {
 
                 printString("손가락 눌림 : " + curX + ", " + curY);
                 Log.d(TAG,"손가락 눌림 : " + curX + ", " + curY);
+
                 if(station != NULL) {
-                    mOnPopupClick(station);
+                    getStationInfo = service1.getStationInfo(station);
+                    getStationInfo.enqueue(station_fun);
                 }
             }
         });
@@ -207,7 +246,10 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("X", curX);
         intent.putExtra("Y", curY);
         intent.putExtra("station", station);
-        startActivityForResult(intent, 1);
+        intent.putExtra("lines", stationlines);
+
+        //intent.putExtra("result", station_result.getSurroundStationList());
+        startActivity(intent);
     }
 
     @Override
@@ -293,4 +335,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private ArrayList getline(StationDTO result){
+        ArrayList<Integer> line_list= new ArrayList<>();
+        int length = result.getSurroundStationList().size();
+        int count = 0;
+
+        line_list.add(result.getSurroundStationList().get(count).get(1));
+        for(int i = 0; i < length; i++){
+            if(result.getSurroundStationList().get(count).get(1) != result.getSurroundStationList().get(i).get(1)){
+                line_list.add(result.getSurroundStationList().get(i).get(1));
+                count ++;
+            }
+        }
+
+        return line_list;
+    }
 }

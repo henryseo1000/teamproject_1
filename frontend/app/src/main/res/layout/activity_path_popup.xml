@@ -32,7 +32,6 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:textSize="20sp"
-            android:text="이전역"
             android:textColor="@color/black"/>
 
         <TextView
@@ -49,7 +48,6 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:textSize="20sp"
-            android:text="다음역"
             android:textColor="@color/black"/>
 
     </LinearLayout>

@@ -9,14 +9,14 @@ import retrofit2.http.Query;
 public interface RetrofitInterface {
 
     // @GET( EndPoint- 자원 위치(URI) )
-    @GET("/todos/{todos}")
-    Call<TestDTO> get_data(@Path("todos") String get);
+    @GET("/station/StationInfo")
+    Call<StationDTO> getStationInfo(@Query("station") int station);
 
     @GET("station/search") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
     Call<RouteDTO> getRouteData(@Query("start") int start, @Query("end") int end,
                                 @Query("type") String type, @Query("time") String time);
 
     @POST("station/search") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
-    Call<RouteDTO> getStationData(@Query("start") int start, @Query("end") int end,
-                                @Query("search_option") String search_option, @Query("start_time") String start_time);
+    Call<RouteDTO> getPathData(@Query("start") int start, @Query("end") int end,
+                               @Query("search_option") String search_option, @Query("start_time") String start_time);
 }

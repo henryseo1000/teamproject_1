@@ -62,7 +62,7 @@ public class FindPathActivity extends AppCompatActivity {
                 .build();
         RetrofitInterface service1 = retrofit.create(RetrofitInterface.class);
 
-        InputMethodManager keymanager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        //InputMethodManager keymanager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
 
         now = new Date();
 
@@ -149,6 +149,8 @@ public class FindPathActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
+                    //keymanager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
                     String startpoint_str = "";
                     startpoint_str = startpoint_input.getText().toString().replaceAll(" ", "");
 
@@ -163,10 +165,8 @@ public class FindPathActivity extends AppCompatActivity {
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                     String gettime = format.format(now);
 
-                    call = service1.getStationData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
+                    call = service1.getPathData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
                     call.enqueue(fun);
-
-                    keymanager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                 }
                 catch(Exception e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(FindPathActivity.this);
