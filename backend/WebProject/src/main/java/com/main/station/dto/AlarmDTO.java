@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AlarmDTO {
     private boolean alarmSetting;
-    private List<List<String>> boardingTimeList;
-    private List<List<String>> gettingOffTimeList;
+    private List<String> boardingTimeList;
+    private List<List<String>> transferTimeList;
 
 }

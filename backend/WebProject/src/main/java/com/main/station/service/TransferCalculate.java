@@ -33,6 +33,7 @@ public class TransferCalculate {
         return totalLineList;
     }
 
+    //환승 횟수 세서 넘김
     public int getTransferCount(List<Integer> totalLineList) {
         int count=0;
         //01234567
@@ -49,4 +50,6 @@ public class TransferCalculate {
         }
         return count;
     }
+
+
 }

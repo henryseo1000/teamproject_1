@@ -28,39 +28,6 @@ public class StationController {
     private final AlarmService alarmService;
     private OptimizedRoute optimizedRoute_;
 
-    @Operation(summary = "역 정보 조회", description = "역 정보를 조회 한다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "400", description = "Bad Request")
-    })
-    @PostMapping("/search")
-    public ResponseEntity<OptimizedRoute> search(@RequestParam("start") int start,
-                                             @RequestParam("end") int end,
-                                             @RequestParam("search_option") String type,
-                                             @RequestParam("start_time") String time
-                                             ) throws IOException, IOException {
-        optimizedRoute_ = routeService.search(start,end,type,time);
-        return new ResponseEntity<>(optimizedRoute_, HttpStatus.OK);
-    }
-
-
-    @Operation(summary = "최적 경로 가져오기", description = "최적의 경로를 보여준다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "400", description = "Bad Request")
-    })
-    @PostMapping("/select")
-    public String select(@ModelAttribute OptimizedRoute optimizedRoute) throws IOException {
-        System.out.println("optimizedRoute = " + optimizedRoute);
-        optimizedRoute = optimizedRoute_;
-        return "select";
-    }
-
-
 ///////////////////////////// 모바일 통신 메서드 //////////////////////////////////////////////////
 
     @Operation(summary = "최적 경로 찾기", description = "최적의 경로를 찾아 보여준다.")
@@ -80,6 +47,8 @@ public class StationController {
         return new ResponseEntity<>(optimizedRoute_, HttpStatus.OK);
     }
 
+
+    ///////////////////////////// 모바일 통신 메서드 /////////////////////////////////////////////////
     @Operation(summary = "알람데이터 가져오기", description = "알람 시간데이터를 가져온다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -93,12 +62,12 @@ public class StationController {
         AlarmDTO alarmDTO = null;
         if (alarmsetting) {
             alarmDTO = alarmService.getAlarmTime(optimizedRoute);
-            System.out.println("alarmDTO = " + alarmDTO.getBoardingTimeList());
-            System.out.println("alarmDTO = " + alarmDTO.getGettingOffTimeList());
         }
         return new ResponseEntity<>(alarmDTO, HttpStatus.OK);
     }
 
+
+    ///////////////////////////// 모바일 통신 메서드 /////////////////////////////////////////////////
     @Operation(summary = "특정 역 정보 가져오기", description = "특정 역의 정보를 가져온다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -114,8 +83,9 @@ public class StationController {
         return new ResponseEntity<>(specificStation, HttpStatus.OK);
     }
 
-    
-    
+
+
+    ///////////////////////////// 모바일 통신 메서드 /////////////////////////////////////////////////
     @Operation(summary = "특정 역 시간표 가져오기", description = "특정 역의 시간표를 가져온다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK"),
