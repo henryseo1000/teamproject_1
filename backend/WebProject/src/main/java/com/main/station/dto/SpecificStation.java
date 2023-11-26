@@ -10,5 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SpecificStation {
+    private int nowStation;
+    private List<Integer> lineList;
     private List<List<Integer>> surroundStationList;
 }
