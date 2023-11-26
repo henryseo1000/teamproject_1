@@ -15,15 +15,16 @@ public class RouteDTO {
     private int time;
     @SerializedName("distance")
     private int distance;
-    @SerializedName("shortestPath")
-    private LinkedList<Integer> shortestPath;
-    @SerializedName("shortestTime")
-    private List<String> shortestTime;
     @SerializedName("expense")
     private int expense;
     @SerializedName("transferCount")
     private int transferCount;
-
+    @SerializedName("shortestPath")
+    private LinkedList<Integer> shortestPath;
+    @SerializedName("shortestTime")
+    private List<String> shortestTime;
+    @SerializedName("totalLineList")
+    private List<Integer> totalLineList;
     @Override
     public String toString(){
         return "RouteDTO{" +
@@ -52,6 +53,8 @@ public class RouteDTO {
     public List<String> getShortestTime() {
         return shortestTime;
     }
+
+    public List<Integer> getTotalLineList() {return totalLineList;}
 
     public int getTotalPrice(){
         return expense;

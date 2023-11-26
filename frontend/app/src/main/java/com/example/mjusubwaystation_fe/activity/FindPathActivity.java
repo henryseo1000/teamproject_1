@@ -6,15 +6,19 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,6 +32,7 @@ import com.example.mjusubwaystation_fe.service.RouteDTO;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,8 +47,10 @@ public class FindPathActivity extends AppCompatActivity {
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
     private String option = "최소시간";
     private ArrayList<String> shortest_path;
+    private ArrayList<Integer> totalLineList;
     private LinearLayout content;
-    private ListView listview;
+    private ListView listview1;
+    private ListView listview2;
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
     private AlertDialog.Builder builder;
     private TextView show_time;
@@ -73,9 +80,12 @@ public class FindPathActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     RouteDTO result = response.body();
                     shortest_path = MainActivity.toArrayList(result.getShortestPath());
+                    totalLineList = MainActivity.toArrayList(result.getTotalLineList());
                     time = result.getTime();
                     expense = result.getTotalPrice();
                     transfer = result.getTransferCount();
+                    setContent();
+                    Log.d(TAG, "성공 : \n" + result.toString());
 
                     setContent();
                     Log.d(TAG, "성공 : \n" + result.toString());
@@ -95,7 +105,8 @@ public class FindPathActivity extends AppCompatActivity {
 
         api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
-        listview = (ListView) findViewById(R.id.listview);
+        listview1 = (ListView) findViewById(R.id.listview1);
+        listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
         btn_dialog.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,6 +141,7 @@ public class FindPathActivity extends AppCompatActivity {
         startpoint = intent.getIntExtra("startpoint", 0);
         destination = intent.getIntExtra("destination", 0);
         shortest_path = intent.getStringArrayListExtra("path");
+        totalLineList = intent.getIntegerArrayListExtra("totalLineList");
         expense = intent.getIntExtra("expense", 0);
         transfer = intent.getIntExtra("transfer", 0);
 
@@ -165,7 +177,7 @@ public class FindPathActivity extends AppCompatActivity {
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                     String gettime = format.format(now);
 
-                    call = service1.getPathData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
+                    call = service1.getRouteData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
                     call.enqueue(fun);
                 }
                 catch(Exception e) {
@@ -193,9 +205,43 @@ public class FindPathActivity extends AppCompatActivity {
     }
 
     private void setPath(ArrayList<String> path){
-        ArrayAdapter<String> adpater = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, shortest_path);
-        listview.setAdapter(adpater);
+
+        ArrayList<Integer> imageResources = new ArrayList<>();
+
+        int defaultLine = totalLineList.get(1)-1;
+        TypedArray typedArrayNode = getResources().obtainTypedArray(R.array.routenode_images);
+        TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
+
+        //첫번째 역에 대해서 이미지 추가
+        int resourceId = typedArrayNode.getResourceId(defaultLine, 0);
+        imageResources.add(resourceId);
+
+        for (int i=3;i< totalLineList.size();i=i+2){
+            int compLine = totalLineList.get(i);
+            if ( compLine==defaultLine) {
+                resourceId = typedArrayLine.getResourceId(compLine-1, 0);
+                imageResources.add(resourceId);
+            } else {
+                resourceId = typedArrayNode.getResourceId(compLine, 0);
+                imageResources.add(resourceId);
+                defaultLine = compLine;
+            }
+        }
+        typedArrayNode.recycle();
+        typedArrayLine.recycle();
+
+
+
+        // listview1에 할당될 이미지를 설정
+        ImageArrayAdapter adapter1 = new ImageArrayAdapter(this, android.R.layout.simple_list_item_1, imageResources);
+        listview1.setAdapter(adapter1);
+
+
+        //경로 표시 --텍스트
+        ArrayAdapter<String> adpater2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, shortest_path);
+        listview2.setAdapter(adpater2);
     }
+
 
     private void showDialog(){
         builder = new AlertDialog.Builder(this);
@@ -228,5 +274,37 @@ public class FindPathActivity extends AppCompatActivity {
                 + time + "초\n약 " + toTime(time) + " 소요됩니다."
         + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
 
+    }
+}
+
+
+
+class ImageArrayAdapter extends ArrayAdapter<Integer> {
+    private Context context;
+    private List<Integer> imageResources;
+
+    public ImageArrayAdapter(Context context, int resource, List<Integer> objects) {
+        super(context, resource, objects);
+        this.context = context;
+        this.imageResources = objects;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ImageView imageView = new ImageView(context);
+        imageView.setImageResource(imageResources.get(position));
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+        // 이미지뷰에 대한 높이 설정
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        // 이 부분을 조절하여 이미지의 크기를 변경할 수 있습니다.
+        layoutParams.height = 132; // 원하는 크기로 수정
+
+        imageView.setLayoutParams(layoutParams);
+
+        return imageView;
     }
 }

@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("destination", path_result.getEnd());
                     intent.putExtra("time", path_result.getTime());
                     intent.putExtra("path", toArrayList(path_result.getShortestPath()));
+                    intent.putExtra("totalLineList", toArrayList(path_result.getTotalLineList()));
                     intent.putExtra("expense", path_result.getTotalPrice());
                     intent.putExtra("transfer", path_result.getTransferCount());
 
@@ -196,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //Log.d(TAG, "버튼을 누른 시점 : " + gettime);
 
-                    getPath = service1.getPathData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
+                    getPath = service1.getRouteData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
                     getPath.enqueue(path_fun);
                 }
                 catch(Exception e) {
@@ -302,6 +304,14 @@ public class MainActivity extends AppCompatActivity {
             path_list.add(path.get(i).toString());
         }
 
+        return path_list;
+    }
+
+    public static ArrayList toArrayList(List<Integer> path){
+        ArrayList<Integer> path_list = new ArrayList<>();
+        for(int i = 0; i < path.size(); i++) {
+            path_list.add(path.get(i));
+        }
         return path_list;
     }
 

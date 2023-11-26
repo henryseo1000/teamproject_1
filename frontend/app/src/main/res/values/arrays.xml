@@ -1,0 +1,27 @@
+<resources>
+    <array name="routenode_images">
+        <item>@drawable/routenode1</item>
+        <item>@drawable/routenode2</item>
+        <item>@drawable/routenode3</item>
+        <item>@drawable/routenode4</item>
+        <item>@drawable/routenode5</item>
+        <item>@drawable/routenode6</item>
+        <item>@drawable/routenode7</item>
+        <item>@drawable/routenode8</item>
+        <item>@drawable/routenode9</item>
+        <!-- 나머지 이미지들도 동일하게 추가 -->
+    </array>
+
+    <array name="routeline_images">
+        <item>@drawable/routeline1</item>
+        <item>@drawable/routeline2</item>
+        <item>@drawable/routeline3</item>
+        <item>@drawable/routeline4</item>
+        <item>@drawable/routeline5</item>
+        <item>@drawable/routeline6</item>
+        <item>@drawable/routeline7</item>
+        <item>@drawable/routeline8</item>
+        <item>@drawable/routeline9</item>
+        <!-- 나머지 이미지들도 동일하게 추가 -->
+    </array>
+</resources>
