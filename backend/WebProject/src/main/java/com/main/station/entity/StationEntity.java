@@ -31,4 +31,7 @@ public class StationEntity {
     @Column
     private int expense;
 
+    @Column
+    private int line;
+
 }
