@@ -30,6 +30,10 @@
             android:name="com.kakao.sdk.AppKey"
             android:value="807ed9849aecb37184efe54c84189e3b" />
 
+        <activity android:name=".activity.DynamicTableActivity">
+        </activity>
+
+
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"

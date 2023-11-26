@@ -28,8 +28,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
-import com.example.mjusubwaystation_fe.service.RouteDTO;
-import com.example.mjusubwaystation_fe.service.StationDTO;
+import com.example.mjusubwaystation_fe.DTO.RouteDTO;
+import com.example.mjusubwaystation_fe.DTO.StationDTO;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;

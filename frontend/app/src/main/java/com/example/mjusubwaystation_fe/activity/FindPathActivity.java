@@ -28,7 +28,7 @@ import android.widget.Toast;
 
 import com.example.mjusubwaystation_fe.R;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
-import com.example.mjusubwaystation_fe.service.RouteDTO;
+import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

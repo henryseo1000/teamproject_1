@@ -1,4 +1,4 @@
-package com.example.mjusubwaystation_fe.service;
+package com.example.mjusubwaystation_fe.DTO;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -13,11 +13,16 @@ import android.widget.TextView;
 import com.example.mjusubwaystation_fe.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class PathPopupActivity extends Activity {
+
     private TextView Title, Content, Prev, Next;
+
+
     public Button time_table, set_as_start, set_as_dest;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +30,8 @@ public class PathPopupActivity extends Activity {
         setContentView(R.layout.activity_path_popup);
         set_as_start = (Button) findViewById(R.id.set_as_start);
         set_as_dest = (Button) findViewById(R.id.set_as_dest);
+        time_table = (Button) findViewById(R.id.time_table); // 추가된 부분
+
         Title = (TextView) findViewById(R.id.Title);
         Content = (TextView) findViewById(R.id.name);
         Prev = (TextView) findViewById(R.id.Prev);
@@ -47,6 +54,10 @@ public class PathPopupActivity extends Activity {
             Content.setText("" + station);
         }
 
+
+
+
+
         set_as_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -55,6 +66,9 @@ public class PathPopupActivity extends Activity {
             }
         });
 
+
+
+
         set_as_dest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -62,6 +76,22 @@ public class PathPopupActivity extends Activity {
                 finish();
             }
         });
+
+        time_table.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String contentText = Content.getText().toString();
+                int station = Integer.parseInt(contentText);
+
+                // "station"이라는 이름으로 station 값을 전달하는 Intent 생성
+                Intent intent = new Intent(PathPopupActivity.this, DynamicTableActivity.class);
+                intent.putExtra("station", station);
+
+                // DynamicTableActivity 시작
+                startActivity(intent);
+            }
+        });
+
     }
 
 }
