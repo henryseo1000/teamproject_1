@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -32,6 +33,7 @@ import com.example.mjusubwaystation_fe.service.RouteDTO;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -49,7 +51,6 @@ public class FindPathActivity extends AppCompatActivity {
     private ArrayList<String> shortest_path;
     private ArrayList<Integer> totalLineList;
     private LinearLayout content;
-    private ListView listview1;
     private ListView listview2;
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
     private AlertDialog.Builder builder;
@@ -105,7 +106,6 @@ public class FindPathActivity extends AppCompatActivity {
 
         api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
-        listview1 = (ListView) findViewById(R.id.listview1);
         listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
         btn_dialog.setOnClickListener(new View.OnClickListener() {
@@ -205,41 +205,13 @@ public class FindPathActivity extends AppCompatActivity {
     }
 
     private void setPath(ArrayList<String> path){
+        List<CombinedItem> combinedItemList = createCombinedItemList(path);
 
-        ArrayList<Integer> imageResources = new ArrayList<>();
+        // 결합된 데이터를 표시할 어댑터 생성
+        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList);
 
-        int defaultLine = totalLineList.get(1)-1;
-        TypedArray typedArrayNode = getResources().obtainTypedArray(R.array.routenode_images);
-        TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
-
-        //첫번째 역에 대해서 이미지 추가
-        int resourceId = typedArrayNode.getResourceId(defaultLine, 0);
-        imageResources.add(resourceId);
-
-        for (int i=3;i< totalLineList.size();i=i+2){
-            int compLine = totalLineList.get(i);
-            if ( compLine==defaultLine) {
-                resourceId = typedArrayLine.getResourceId(compLine-1, 0);
-                imageResources.add(resourceId);
-            } else {
-                resourceId = typedArrayNode.getResourceId(compLine, 0);
-                imageResources.add(resourceId);
-                defaultLine = compLine;
-            }
-        }
-        typedArrayNode.recycle();
-        typedArrayLine.recycle();
-
-
-
-        // listview1에 할당될 이미지를 설정
-        ImageArrayAdapter adapter1 = new ImageArrayAdapter(this, android.R.layout.simple_list_item_1, imageResources);
-        listview1.setAdapter(adapter1);
-
-
-        //경로 표시 --텍스트
-        ArrayAdapter<String> adpater2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, shortest_path);
-        listview2.setAdapter(adpater2);
+        // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
+        listview2.setAdapter(adapter);
     }
 
 
@@ -275,6 +247,73 @@ public class FindPathActivity extends AppCompatActivity {
         + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
 
     }
+
+    public ArrayList modifyPath (ArrayList<String> path){
+        ArrayList<String> modifyPath = new ArrayList<>();
+
+        for(int i = 0; i < path.size(); i++) {
+            modifyPath.add(path.get(i).toString());
+            if (i == path.size()-1) {
+                break;
+            } else {
+                modifyPath.add(" ");
+            }
+        }
+
+        return modifyPath;
+    }
+
+    ///////////////////////테스트////////////////////////////////////////////////////////
+    private List<CombinedItem> createCombinedItemList(ArrayList<String> path) {
+        List<CombinedItem> combinedItemList = new ArrayList<>();
+        TypedArray typedArrayNode = getResources().obtainTypedArray(R.array.routenode_images);
+        TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
+
+        //첫번째 역에 대한 호선 정보
+        int defaultLine = totalLineList.get(1);
+        int resourceIdNode = typedArrayNode.getResourceId(defaultLine - 1, 0);
+        int resourceIdLine = typedArrayLine.getResourceId(defaultLine - 1, 0);
+        combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(0))); // modifyPath에 해당하는 텍스트 추가
+        combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+
+        //그 이후의 역에 대해서 이미지 및 텍스트를 결합하여 CombinedItem 추가
+        int j=1;
+        for (int i = 3; i < totalLineList.size(); i = i + 2) {
+            int compLine = totalLineList.get(i);
+            Log.d(TAG, "현재 i는 : "+i+"\n");
+
+            //마지막 역인 경우
+            if (compLine == 0) {
+                Log.d(TAG, "마지막 역에 해당됨\n");
+                Log.d(TAG, "추가할 position : "+(defaultLine-1)+"\n");
+                resourceIdNode = typedArrayNode.getResourceId(defaultLine - 1, 0);
+                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j))); // modifyPath에 해당하는 텍스트 추가
+                break;
+            }
+
+            // 중간 역인 경우
+            if (compLine == defaultLine) {   //이전 역과 같은 경우
+                resourceIdNode = typedArrayNode.getResourceId(compLine - 1, 0);
+                resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
+                combinedItemList.add(new CombinedItem(resourceIdNode,shortest_path.get(j))); // modifyPath에 해당하는 텍스트 추가
+                combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+            } else {    //이전 역과 다른 경우 == 환승
+                Log.d(TAG, "환승하는 것에 걸림\n");
+                resourceIdNode = typedArrayNode.getResourceId(compLine - 1, 0);
+                resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
+                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j))); // modifyPath에 해당하는 텍스트 추가
+                combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+                //기준 값 변경함
+                defaultLine = compLine;
+            }
+            j++;
+        }
+        typedArrayNode.recycle();
+        typedArrayLine.recycle();
+
+        return combinedItemList;
+    }
+    ///////////////////////테스트////////////////////////////////////////////////////////
 }
 
 
@@ -306,5 +345,54 @@ class ImageArrayAdapter extends ArrayAdapter<Integer> {
         imageView.setLayoutParams(layoutParams);
 
         return imageView;
+    }
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+class CombinedItem {
+    private int imageResource;
+    private String text;
+
+    public CombinedItem(int imageResource, String text) {
+        this.imageResource = imageResource;
+        this.text = text;
+    }
+
+    public int getImageResource() {
+        return imageResource;
+    }
+
+    public String getText() {
+        return text;
+    }
+}
+
+class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {
+    private Context context;
+    private List<CombinedItem> combinedItems;
+
+    public CombinedArrayAdapter(Context context, int resource, List<CombinedItem> objects) {
+        super(context, resource, objects);
+        this.context = context;
+        this.combinedItems = objects;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View rowView = inflater.inflate(R.layout.custom_list_item, parent, false);
+
+        ImageView imageView = rowView.findViewById(R.id.imageView);
+        TextView textView = rowView.findViewById(R.id.textView_list);
+
+        // Set image and text for the combined item
+        CombinedItem combinedItem = combinedItems.get(position);
+        imageView.setImageResource(combinedItem.getImageResource());
+        textView.setText(combinedItem.getText());
+
+        return rowView;
     }
 }
