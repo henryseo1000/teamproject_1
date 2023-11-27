@@ -1,4 +1,4 @@
-package com.example.mjusubwaystation_fe.service;
+package com.example.mjusubwaystation_fe.DTO;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -15,14 +15,16 @@ public class RouteDTO {
     private int time;
     @SerializedName("distance")
     private int distance;
-    @SerializedName("shortestPath")
-    private LinkedList<Integer> shortestPath;
-    @SerializedName("shortestTime")
-    private List<String> shortestTime;
     @SerializedName("expense")
     private int expense;
     @SerializedName("transferCount")
     private int transferCount;
+    @SerializedName("shortestPath")
+    private LinkedList<Integer> shortestPath;
+    @SerializedName("shortestTime")
+    private List<String> shortestTime;
+    @SerializedName("totalLineList")
+    private List<String> totalLineList;
 
     @Override
     public String toString(){

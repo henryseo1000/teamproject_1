@@ -2,16 +2,26 @@ package com.example.mjusubwaystation_fe.activity;
 
 import static android.content.ContentValues.TAG;
 
+import static com.example.mjusubwaystation_fe.service.AlarmReceiver.CHANNEL_ID;
+import static com.example.mjusubwaystation_fe.service.AlarmReceiver.CHANNEL_NAME;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,8 +32,9 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.mjusubwaystation_fe.R;
+import com.example.mjusubwaystation_fe.service.AlarmReceiver;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
-import com.example.mjusubwaystation_fe.service.RouteDTO;
+import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,12 +56,13 @@ public class FindPathActivity extends AppCompatActivity {
     private LinearLayout content;
     private ListView listview;
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
-    private AlertDialog.Builder builder;
+    private AlertDialog.Builder a_builder;
     private TextView show_time;
     private Call<RouteDTO> call;
     private Date now;
-
-
+    private NotificationManager notificationManager;
+    private AlarmManager alarmManager;
+    private NotificationCompat.Builder n_builder;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +77,8 @@ public class FindPathActivity extends AppCompatActivity {
         //InputMethodManager keymanager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
 
         now = new Date();
+        notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
         Callback fun = new Callback<RouteDTO>() {
             @Override
@@ -140,8 +154,18 @@ public class FindPathActivity extends AppCompatActivity {
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                finish();
+                showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                setAlarm("2023-11-27 20:08:00");
+
+                Intent intent = new Intent(getApplicationContext(), DetailPathActivity.class);
+                intent.putExtra("startpoint", startpoint);
+                intent.putExtra("destination", destination);
+                intent.putExtra("time", time);
+                intent.putExtra("path", shortest_path);
+                intent.putExtra("expense", expense);
+                intent.putExtra("transfer", transfer);
+
+                startActivity(intent);
             }
         });
 
@@ -177,6 +201,48 @@ public class FindPathActivity extends AppCompatActivity {
             }
         });
     }
+    public void showNotification(String message, String title){
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_LOW;
+
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    "test1",
+                   "Test1",
+                    importance
+            );
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        n_builder = new NotificationCompat.Builder(this, "test1");
+
+        n_builder.setSmallIcon(R.drawable.clock);
+        n_builder.setContentTitle(title);
+        n_builder.setContentText(message);
+
+        notificationManager.notify(0, n_builder.build());
+    }
+
+    public void setAlarm(String from) {
+        //AlarmReceiver에 값 전달
+        Intent receiverIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        //날짜 포맷을 바꿔주는 소스코드
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date datetime = now;
+        try {
+            datetime = dateFormat.parse(from);
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(datetime);
+        Log.d(TAG, "알람 세팅 시간은 : " + datetime);
+
+        alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+    }
 
     private String toTime(int seconds){
         int hours = 0;
@@ -198,11 +264,11 @@ public class FindPathActivity extends AppCompatActivity {
     }
 
     private void showDialog(){
-        builder = new AlertDialog.Builder(this);
-        builder.setTitle("검색 옵션을 선택하세요 : ");
+        a_builder = new AlertDialog.Builder(this);
+        a_builder.setTitle("검색 옵션을 선택하세요 : ");
 
         //다이얼로그에 리스트 담기
-        builder.setItems(filters, new DialogInterface.OnClickListener() {
+        a_builder.setItems(filters, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if(filters[which].equals("최소비용")){
@@ -218,7 +284,7 @@ public class FindPathActivity extends AppCompatActivity {
             }
         });
 
-        AlertDialog alertDialog = builder.create();
+        AlertDialog alertDialog = a_builder.create();
         alertDialog.show();
     }
 
@@ -227,6 +293,5 @@ public class FindPathActivity extends AppCompatActivity {
         api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
                 + time + "초\n약 " + toTime(time) + " 소요됩니다."
         + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
-
     }
 }

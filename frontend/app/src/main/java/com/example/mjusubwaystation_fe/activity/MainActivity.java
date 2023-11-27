@@ -3,10 +3,14 @@ import static android.content.ContentValues.TAG;
 
 import static java.sql.Types.NULL;
 
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.icu.util.Calendar;
+import android.net.ParseException;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -27,19 +31,18 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.mjusubwaystation_fe.service.AlarmReceiver;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
-import com.example.mjusubwaystation_fe.service.RouteDTO;
-import com.example.mjusubwaystation_fe.service.StationDTO;
+import com.example.mjusubwaystation_fe.DTO.RouteDTO;
+import com.example.mjusubwaystation_fe.DTO.StationDTO;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
-import java.sql.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -50,7 +53,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String CHANNEL_ID = "channel_1_ID", CHANNEL_NAME = "channel_1";
     private TextView output, settings;
     public static int station = 0;
     public static EditText startpoint_input, destination_input;
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     Date now;
     RetrofitInterface service1;
     Callback path_fun, station_fun;
+
     private ArrayList<Integer> stationlines;
     private int[] surroundstation;
     @Override
@@ -107,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
-
                     path_result = response.body();
                     Log.d(TAG, "성공 : \n" + path_result.toString());
 
@@ -177,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    showNotification("버튼이 눌렸습니다!", "MJUSubwayStation");
                     startpoint = startpoint_input.getText().toString();
                     destination = destination_input.getText().toString();
 
@@ -271,28 +272,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
-    }
-
-    public void showNotification(String message, String title){
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_LOW;
-
-            NotificationChannel notificationChannel = new NotificationChannel(
-                    CHANNEL_ID,
-                    CHANNEL_NAME,
-                    importance
-            );
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-
-        builder.setSmallIcon(R.drawable.clock);
-        builder.setContentTitle(title);
-        builder.setContentText(message);
-
-        notificationManager.notify(0, builder.build());
     }
 
     public static ArrayList toArrayList(LinkedList<Integer> path){
