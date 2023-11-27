@@ -2,11 +2,17 @@ package com.example.mjusubwaystation_fe.service;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.POST;
+
 import retrofit2.http.Query;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 import com.example.mjusubwaystation_fe.DTO.StationDTO;
+
+import com.example.mjusubwaystation_fe.DTO.RouteDTO;
+import com.example.mjusubwaystation_fe.DTO.StationDTO;
+import com.example.mjusubwaystation_fe.DTO.StationTimeDTO;
+
+import java.util.List;
 
 public interface RetrofitInterface {
 
@@ -21,4 +27,7 @@ public interface RetrofitInterface {
     @GET("station/select") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
     Call<RouteDTO> getAlarmData(@Query("start") int start, @Query("end") int end,
                                @Query("search_option") String search_option, @Query("start_time") String start_time);
+
+    @GET("station/StationTimeInfo") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
+    Call<List<StationTimeDTO>> selectStationTime(@Query("station") int station);
 }

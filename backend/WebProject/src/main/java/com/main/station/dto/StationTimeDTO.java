@@ -10,8 +10,7 @@ import lombok.*;
 public class StationTimeDTO {
     private int time_id;
     private int station_id;
-    private String direction;
-    private int next_line;
+    private int direction;
     private String start_time;
 
     public static StationTimeDTO toStationDTO(StationTimeEntity stationTimeEntity) {
@@ -19,7 +18,6 @@ public class StationTimeDTO {
         stationTimeDTO.setStation_id(stationTimeEntity.getStation_id());
         stationTimeDTO.setTime_id(stationTimeEntity.getTime_id());
         stationTimeDTO.setDirection(stationTimeEntity.getDirection());
-        stationTimeDTO.setNext_line(stationTimeEntity.getNext_line());
         stationTimeDTO.setStart_time(stationTimeEntity.getStart_time());
 
         return stationTimeDTO;

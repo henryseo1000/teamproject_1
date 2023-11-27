@@ -17,14 +17,21 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+
 import android.icu.util.Calendar;
 import android.os.Build;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,6 +46,8 @@ import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,8 +62,10 @@ public class FindPathActivity extends AppCompatActivity {
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
     private String option = "최소시간";
     private ArrayList<String> shortest_path;
+    private ArrayList<Integer> totalLineList;
+    private ArrayList<String> totalTimeList;
     private LinearLayout content;
-    private ListView listview;
+    private ListView listview2;
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
     private AlertDialog.Builder a_builder;
     private TextView show_time;
@@ -87,10 +98,12 @@ public class FindPathActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     RouteDTO result = response.body();
                     shortest_path = MainActivity.toArrayList(result.getShortestPath());
+                    totalLineList = MainActivity.toArrayList(result.getTotalLineList());
+                    totalTimeList = new ArrayList<>(result.getShortestTime());
+
                     time = result.getTime();
                     expense = result.getTotalPrice();
                     transfer = result.getTransferCount();
-
                     setContent();
                     Log.d(TAG, "성공 : \n" + result.toString());
                 } else {
@@ -109,7 +122,7 @@ public class FindPathActivity extends AppCompatActivity {
 
         api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
-        listview = (ListView) findViewById(R.id.listview);
+        listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
         btn_dialog.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,6 +157,8 @@ public class FindPathActivity extends AppCompatActivity {
         startpoint = intent.getIntExtra("startpoint", 0);
         destination = intent.getIntExtra("destination", 0);
         shortest_path = intent.getStringArrayListExtra("path");
+        totalLineList = intent.getIntegerArrayListExtra("totalLineList");
+        totalTimeList = intent.getStringArrayListExtra("totalTimeList");
         expense = intent.getIntExtra("expense", 0);
         transfer = intent.getIntExtra("transfer", 0);
 
@@ -189,7 +204,7 @@ public class FindPathActivity extends AppCompatActivity {
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                     String gettime = format.format(now);
 
-                    call = service1.getPathData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
+                    call = service1.getRouteData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
                     call.enqueue(fun);
                 }
                 catch(Exception e) {
@@ -259,9 +274,15 @@ public class FindPathActivity extends AppCompatActivity {
     }
 
     private void setPath(ArrayList<String> path){
-        ArrayAdapter<String> adpater = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, shortest_path);
-        listview.setAdapter(adpater);
+        List<CombinedItem> combinedItemList = createCombinedItemList(path);
+
+        // 결합된 데이터를 표시할 어댑터 생성
+        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList);
+
+        // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
+        listview2.setAdapter(adapter);
     }
+
 
     private void showDialog(){
         a_builder = new AlertDialog.Builder(this);
@@ -293,5 +314,124 @@ public class FindPathActivity extends AppCompatActivity {
         api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
                 + time + "초\n약 " + toTime(time) + " 소요됩니다."
         + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
+    }
+
+    public ArrayList modifyPath (ArrayList<String> path){
+        ArrayList<String> modifyPath = new ArrayList<>();
+
+        for(int i = 0; i < path.size(); i++) {
+            modifyPath.add(path.get(i).toString());
+            if (i == path.size()-1) {
+                break;
+            } else {
+                modifyPath.add(" ");
+            }
+        }
+
+        return modifyPath;
+    }
+
+    ///////////////////////테스트////////////////////////////////////////////////////////
+    private List<CombinedItem> createCombinedItemList(ArrayList<String> path) {
+
+        List<CombinedItem> combinedItemList = new ArrayList<>();
+        TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
+
+        TypedArray typedArrayNodeStart = getResources().obtainTypedArray(R.array.routenodestart_images);
+        TypedArray typedArrayNodeCenter = getResources().obtainTypedArray(R.array.routenodecenter_images);
+        TypedArray typedArrayNodeEnd = getResources().obtainTypedArray(R.array.routenodeend_images);
+
+        //첫번째 역에 대한 호선 정보
+        int defaultLine = totalLineList.get(1);
+        int resourceIdNode = typedArrayNodeStart.getResourceId(defaultLine - 1, 0);
+        int resourceIdLine = typedArrayLine.getResourceId(defaultLine - 1, 0);
+        combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(0)+"       -        "+totalTimeList.get(0))); // modifyPath에 해당하는 텍스트 추가
+        combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+
+        //그 이후의 역에 대해서 이미지 및 텍스트를 결합하여 CombinedItem 추가
+        int j=1;
+        int k=2;
+        for (int i = 3; i < totalLineList.size(); i = i + 2) {
+            int compLine = totalLineList.get(i);
+
+            //마지막 역인 경우
+            if (compLine == 0) {
+                resourceIdNode = typedArrayNodeEnd.getResourceId(defaultLine - 1, 0);
+                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j)+"       -        "+totalTimeList.get(k-1))); // modifyPath에 해당하는 텍스트 추가
+                break;
+            }
+
+            // 중간 역인 경우
+            if (compLine == defaultLine) {   //이전 역과 같은 경우
+                resourceIdNode = typedArrayNodeCenter.getResourceId(compLine - 1, 0);
+                resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
+                combinedItemList.add(new CombinedItem(resourceIdNode,shortest_path.get(j)+"       -        "+totalTimeList.get(k))); // modifyPath에 해당하는 텍스트 추가
+                combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+            } else {    //이전 역과 다른 경우 == 환승
+                resourceIdNode = typedArrayNodeCenter.getResourceId(compLine - 1, 0);
+                resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
+                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j)+"       -        "+totalTimeList.get(k))); // modifyPath에 해당하는 텍스트 추가
+                combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+                //기준 값 변경함
+                defaultLine = compLine;
+            }
+            j++;
+            k=k+2;
+        }
+        typedArrayNodeStart.recycle();
+        typedArrayNodeCenter.recycle();
+        typedArrayNodeEnd.recycle();
+        typedArrayLine.recycle();
+
+        return combinedItemList;
+    }
+    ///////////////////////테스트////////////////////////////////////////////////////////
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+class CombinedItem {
+    private int imageResource;
+    private String text;
+
+    public CombinedItem(int imageResource, String text) {
+        this.imageResource = imageResource;
+        this.text = text;
+    }
+
+    public int getImageResource() {
+        return imageResource;
+    }
+
+    public String getText() {return text;}
+}
+
+class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {
+    private Context context;
+    private List<CombinedItem> combinedItems;
+
+    public CombinedArrayAdapter(Context context, int resource, List<CombinedItem> objects) {
+        super(context, resource, objects);
+        this.context = context;
+        this.combinedItems = objects;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View rowView = inflater.inflate(R.layout.custom_list_item, parent, false);
+
+        ImageView imageView = rowView.findViewById(R.id.imageView);
+        TextView textView = rowView.findViewById(R.id.textView_list);
+
+        // Set image and text for the combined item
+        CombinedItem combinedItem = combinedItems.get(position);
+        imageView.setImageResource(combinedItem.getImageResource());
+        textView.setText(combinedItem.getText());
+
+        return rowView;
     }
 }

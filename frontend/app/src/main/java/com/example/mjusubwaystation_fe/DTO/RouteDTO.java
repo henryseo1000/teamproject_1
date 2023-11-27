@@ -24,14 +24,14 @@ public class RouteDTO {
     @SerializedName("shortestTime")
     private List<String> shortestTime;
     @SerializedName("totalLineList")
-    private List<String> totalLineList;
-
+    private List<Integer> totalLineList;
     @Override
     public String toString(){
         return "RouteDTO{" +
                 "start=" + start +
                 ", end=" + end +
                 ", result='" + time + '\''  +
+                ", timeList='" + shortestTime + '\''  +
                 '}';
     }
 
@@ -54,6 +54,8 @@ public class RouteDTO {
     public List<String> getShortestTime() {
         return shortestTime;
     }
+
+    public List<Integer> getTotalLineList() {return totalLineList;}
 
     public int getTotalPrice(){
         return expense;

@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+    <!-- ScrollView 추가 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 기존의 TableLayout 추가 -->
+        <TableLayout
+            android:id="@+id/tableLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center_horizontal">
+
+            <!-- 테이블 레이아웃의 내용은 이곳에 추가합니다. -->
+            <TableRow
+                android:gravity="center">
+
+                <TextView
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="출발 호선" />
+
+                <TextView
+                    android:layout_width="110dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="현재 역" />
+
+                <TextView
+                    android:layout_width="153dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="열차 출발 시간" />
+            </TableRow>
+
+            <!-- 추가된 행들은 이곳에 계속해서 추가합니다. -->
+
+        </TableLayout>
+
+    </ScrollView>
+
+</LinearLayout>
