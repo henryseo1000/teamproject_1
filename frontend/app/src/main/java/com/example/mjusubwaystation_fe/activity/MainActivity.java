@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //Log.d(TAG, "버튼을 누른 시점 : " + gettime);
 
-                    getPath = service1.getRouteData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
+                    getPath = service1.getPathData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
                     getPath.enqueue(path_fun);
                 }
                 catch(Exception e) {

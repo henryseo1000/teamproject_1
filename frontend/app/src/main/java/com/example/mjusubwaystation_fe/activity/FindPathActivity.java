@@ -204,7 +204,7 @@ public class FindPathActivity extends AppCompatActivity {
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                     String gettime = format.format(now);
 
-                    call = service1.getRouteData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
+                    call = service1.getPathData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
                     call.enqueue(fun);
                 }
                 catch(Exception e) {
