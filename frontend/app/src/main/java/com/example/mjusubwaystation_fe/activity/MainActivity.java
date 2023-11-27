@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("time", path_result.getTime());
                     intent.putExtra("path", toArrayList(path_result.getShortestPath()));
                     intent.putExtra("totalLineList", toArrayList(path_result.getTotalLineList()));
+                    intent.putExtra("totalTimeList", new ArrayList<>(path_result.getShortestTime()));
                     intent.putExtra("expense", path_result.getTotalPrice());
                     intent.putExtra("transfer", path_result.getTransferCount());
 
@@ -314,6 +315,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return path_list;
     }
+
 
     public static void pressed_location(float curX, float curY){
         if(curX > 0.038879395 && curY > 0.4860061 && curX < 0.056935627 && curY < 0.5073234){ // 101

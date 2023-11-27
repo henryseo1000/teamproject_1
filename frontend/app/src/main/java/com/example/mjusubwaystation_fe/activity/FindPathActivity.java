@@ -50,6 +50,7 @@ public class FindPathActivity extends AppCompatActivity {
     private String option = "최소시간";
     private ArrayList<String> shortest_path;
     private ArrayList<Integer> totalLineList;
+    private ArrayList<String> totalTimeList;
     private LinearLayout content;
     private ListView listview2;
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
@@ -82,12 +83,11 @@ public class FindPathActivity extends AppCompatActivity {
                     RouteDTO result = response.body();
                     shortest_path = MainActivity.toArrayList(result.getShortestPath());
                     totalLineList = MainActivity.toArrayList(result.getTotalLineList());
+                    totalTimeList = new ArrayList<>(result.getShortestTime());
+
                     time = result.getTime();
                     expense = result.getTotalPrice();
                     transfer = result.getTransferCount();
-                    setContent();
-                    Log.d(TAG, "성공 : \n" + result.toString());
-
                     setContent();
                     Log.d(TAG, "성공 : \n" + result.toString());
                 } else {
@@ -142,6 +142,7 @@ public class FindPathActivity extends AppCompatActivity {
         destination = intent.getIntExtra("destination", 0);
         shortest_path = intent.getStringArrayListExtra("path");
         totalLineList = intent.getIntegerArrayListExtra("totalLineList");
+        totalTimeList = intent.getStringArrayListExtra("totalTimeList");
         expense = intent.getIntExtra("expense", 0);
         transfer = intent.getIntExtra("transfer", 0);
 
@@ -265,50 +266,54 @@ public class FindPathActivity extends AppCompatActivity {
 
     ///////////////////////테스트////////////////////////////////////////////////////////
     private List<CombinedItem> createCombinedItemList(ArrayList<String> path) {
+
         List<CombinedItem> combinedItemList = new ArrayList<>();
-        TypedArray typedArrayNode = getResources().obtainTypedArray(R.array.routenode_images);
         TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
+
+        TypedArray typedArrayNodeStart = getResources().obtainTypedArray(R.array.routenodestart_images);
+        TypedArray typedArrayNodeCenter = getResources().obtainTypedArray(R.array.routenodecenter_images);
+        TypedArray typedArrayNodeEnd = getResources().obtainTypedArray(R.array.routenodeend_images);
 
         //첫번째 역에 대한 호선 정보
         int defaultLine = totalLineList.get(1);
-        int resourceIdNode = typedArrayNode.getResourceId(defaultLine - 1, 0);
+        int resourceIdNode = typedArrayNodeStart.getResourceId(defaultLine - 1, 0);
         int resourceIdLine = typedArrayLine.getResourceId(defaultLine - 1, 0);
-        combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(0))); // modifyPath에 해당하는 텍스트 추가
+        combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(0)+"       -        "+totalTimeList.get(0))); // modifyPath에 해당하는 텍스트 추가
         combinedItemList.add(new CombinedItem(resourceIdLine, ""));
 
         //그 이후의 역에 대해서 이미지 및 텍스트를 결합하여 CombinedItem 추가
         int j=1;
+        int k=2;
         for (int i = 3; i < totalLineList.size(); i = i + 2) {
             int compLine = totalLineList.get(i);
-            Log.d(TAG, "현재 i는 : "+i+"\n");
 
             //마지막 역인 경우
             if (compLine == 0) {
-                Log.d(TAG, "마지막 역에 해당됨\n");
-                Log.d(TAG, "추가할 position : "+(defaultLine-1)+"\n");
-                resourceIdNode = typedArrayNode.getResourceId(defaultLine - 1, 0);
-                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j))); // modifyPath에 해당하는 텍스트 추가
+                resourceIdNode = typedArrayNodeEnd.getResourceId(defaultLine - 1, 0);
+                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j)+"       -        "+totalTimeList.get(k-1))); // modifyPath에 해당하는 텍스트 추가
                 break;
             }
 
             // 중간 역인 경우
             if (compLine == defaultLine) {   //이전 역과 같은 경우
-                resourceIdNode = typedArrayNode.getResourceId(compLine - 1, 0);
+                resourceIdNode = typedArrayNodeCenter.getResourceId(compLine - 1, 0);
                 resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
-                combinedItemList.add(new CombinedItem(resourceIdNode,shortest_path.get(j))); // modifyPath에 해당하는 텍스트 추가
+                combinedItemList.add(new CombinedItem(resourceIdNode,shortest_path.get(j)+"       -        "+totalTimeList.get(k))); // modifyPath에 해당하는 텍스트 추가
                 combinedItemList.add(new CombinedItem(resourceIdLine, ""));
             } else {    //이전 역과 다른 경우 == 환승
-                Log.d(TAG, "환승하는 것에 걸림\n");
-                resourceIdNode = typedArrayNode.getResourceId(compLine - 1, 0);
+                resourceIdNode = typedArrayNodeCenter.getResourceId(compLine - 1, 0);
                 resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
-                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j))); // modifyPath에 해당하는 텍스트 추가
+                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j)+"       -        "+totalTimeList.get(k))); // modifyPath에 해당하는 텍스트 추가
                 combinedItemList.add(new CombinedItem(resourceIdLine, ""));
                 //기준 값 변경함
                 defaultLine = compLine;
             }
             j++;
+            k=k+2;
         }
-        typedArrayNode.recycle();
+        typedArrayNodeStart.recycle();
+        typedArrayNodeCenter.recycle();
+        typedArrayNodeEnd.recycle();
         typedArrayLine.recycle();
 
         return combinedItemList;
@@ -316,37 +321,6 @@ public class FindPathActivity extends AppCompatActivity {
     ///////////////////////테스트////////////////////////////////////////////////////////
 }
 
-
-
-class ImageArrayAdapter extends ArrayAdapter<Integer> {
-    private Context context;
-    private List<Integer> imageResources;
-
-    public ImageArrayAdapter(Context context, int resource, List<Integer> objects) {
-        super(context, resource, objects);
-        this.context = context;
-        this.imageResources = objects;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView = new ImageView(context);
-        imageView.setImageResource(imageResources.get(position));
-        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
-        // 이미지뷰에 대한 높이 설정
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        // 이 부분을 조절하여 이미지의 크기를 변경할 수 있습니다.
-        layoutParams.height = 132; // 원하는 크기로 수정
-
-        imageView.setLayoutParams(layoutParams);
-
-        return imageView;
-    }
-}
 
 
 
@@ -365,9 +339,7 @@ class CombinedItem {
         return imageResource;
     }
 
-    public String getText() {
-        return text;
-    }
+    public String getText() {return text;}
 }
 
 class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {

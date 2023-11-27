@@ -31,6 +31,7 @@ public class RouteDTO {
                 "start=" + start +
                 ", end=" + end +
                 ", result='" + time + '\''  +
+                ", timeList='" + shortestTime + '\''  +
                 '}';
     }
 
