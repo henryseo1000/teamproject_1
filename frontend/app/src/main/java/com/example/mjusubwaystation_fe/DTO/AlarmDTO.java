@@ -1,7 +1,6 @@
 package com.example.mjusubwaystation_fe.DTO;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,5 +37,4 @@ public class AlarmDTO {
     public void setTransferTimeList(List<List<String>> transferTimeList) {
         this.transferTimeList = transferTimeList;
     }
-
 }
