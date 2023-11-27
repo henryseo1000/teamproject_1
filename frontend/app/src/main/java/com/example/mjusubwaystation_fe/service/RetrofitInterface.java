@@ -20,14 +20,14 @@ public interface RetrofitInterface {
     @GET("/station/StationInfo")
     Call<StationDTO> getStationInfo(@Query("station") int station);
 
-    @GET("station/search") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
+    @GET("/station/search") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
     Call<RouteDTO> getPathData(@Query("start") int start, @Query("end") int end,
                                 @Query("type") String type, @Query("time") String time);
 
-    @GET("station/select") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
+    @GET("/station/select") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
     Call<RouteDTO> getAlarmData(@Query("start") int start, @Query("end") int end,
                                @Query("search_option") String search_option, @Query("start_time") String start_time);
 
-    @GET("station/StationTimeInfo") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
+    @GET("/station/StationTimeInfo") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
     Call<List<StationTimeDTO>> selectStationTime(@Query("station") int station);
 }

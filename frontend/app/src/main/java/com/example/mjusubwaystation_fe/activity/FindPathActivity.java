@@ -2,8 +2,8 @@ package com.example.mjusubwaystation_fe.activity;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.mjusubwaystation_fe.service.AlarmReceiver.CHANNEL_ID;
-import static com.example.mjusubwaystation_fe.service.AlarmReceiver.CHANNEL_NAME;
+import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListI;
+import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListS;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,7 +45,6 @@ import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -86,7 +84,6 @@ public class FindPathActivity extends AppCompatActivity {
         RetrofitInterface service1 = retrofit.create(RetrofitInterface.class);
 
         //InputMethodManager keymanager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
-
         now = new Date();
         notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
@@ -94,11 +91,10 @@ public class FindPathActivity extends AppCompatActivity {
         Callback fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
-
                 if (response.isSuccessful()) {
                     RouteDTO result = response.body();
-                    shortest_path = MainActivity.toArrayList(result.getShortestPath());
-                    totalLineList = MainActivity.toArrayList(result.getTotalLineList());
+                    shortest_path = toArrayListS(result.getShortestPath());
+                    totalLineList = toArrayListI(result.getTotalLineList());
                     totalTimeList = new ArrayList<>(result.getShortestTime());
 
                     time = result.getTime();

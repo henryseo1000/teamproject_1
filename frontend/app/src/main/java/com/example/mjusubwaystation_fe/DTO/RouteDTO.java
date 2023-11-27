@@ -25,13 +25,14 @@ public class RouteDTO {
     private List<String> shortestTime;
     @SerializedName("totalLineList")
     private List<Integer> totalLineList;
+
     @Override
     public String toString(){
         return "RouteDTO{" +
                 "start=" + start +
                 ", end=" + end +
-                ", result='" + time + '\''  +
-                ", timeList='" + shortestTime + '\''  +
+                ", time='" + time + '\''  +
+                ", shortestTime='" + shortestTime + '\''  +
                 '}';
     }
 

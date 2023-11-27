@@ -1,7 +1,6 @@
 package com.example.mjusubwaystation_fe.DTO;
 
 public class StationTimeDTO {
-
     private int time_id;
     private int station_id;
     private int direction;

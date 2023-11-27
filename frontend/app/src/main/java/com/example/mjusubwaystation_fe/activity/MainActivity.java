@@ -3,15 +3,7 @@ import static android.content.ContentValues.TAG;
 
 import static java.sql.Types.NULL;
 
-import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.icu.util.Calendar;
-import android.net.ParseException;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.example.mjusubwaystation_fe.R;
@@ -22,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import androidx.core.app.NotificationCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -31,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.mjusubwaystation_fe.service.AlarmReceiver;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 import com.example.mjusubwaystation_fe.DTO.StationDTO;
@@ -118,9 +108,9 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("startpoint", path_result.getStart());
                     intent.putExtra("destination", path_result.getEnd());
                     intent.putExtra("time", path_result.getTime());
-                    intent.putExtra("path", toArrayList(path_result.getShortestPath()));
-                    intent.putExtra("totalLineList", toArrayList(path_result.getTotalLineList()));
-                    intent.putExtra("totalTimeList", new ArrayList<>(path_result.getShortestTime()));
+                    intent.putExtra("path", toArrayListS(path_result.getShortestPath()));
+                    intent.putExtra("totalLineList", toArrayListI(path_result.getTotalLineList()));
+                    intent.putExtra("totalTimeList", toArrayListS(path_result.getShortestTime()));
                     intent.putExtra("expense", path_result.getTotalPrice());
                     intent.putExtra("transfer", path_result.getTransferCount());
 
@@ -277,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static ArrayList toArrayList(LinkedList<Integer> path){
+    public static ArrayList toArrayListS(LinkedList<Integer> path){
         ArrayList<String> path_list = new ArrayList<>();
 
         for(int i = 0; i < path.size(); i++) {
@@ -287,8 +277,15 @@ public class MainActivity extends AppCompatActivity {
         return path_list;
     }
 
-    public static ArrayList toArrayList(List<Integer> path){
+    public static ArrayList toArrayListI(List<Integer> path){
         ArrayList<Integer> path_list = new ArrayList<>();
+        for(int i = 0; i < path.size(); i++) {
+            path_list.add(path.get(i));
+        }
+        return path_list;
+    }
+    public static ArrayList toArrayListS(List<String> path){
+        ArrayList<String> path_list = new ArrayList<>();
         for(int i = 0; i < path.size(); i++) {
             path_list.add(path.get(i));
         }

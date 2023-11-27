@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class StationDTO {
-
     @SerializedName("surroundStationList")
     private List<List<Integer>> surroundStationList;
 
