@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("transfer", path_result.getTransferCount());
                     intent.putExtra("alarmTime", time_text);
                     intent.putExtra("distance", path_result.getDistance());
+                    intent.putExtra("result_dto", path_result);
 
                     startActivity(intent);
                 }

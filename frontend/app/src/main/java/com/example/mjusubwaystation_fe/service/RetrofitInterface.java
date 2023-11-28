@@ -27,7 +27,7 @@ public interface RetrofitInterface {
                                 @Query("type") String type, @Query("time") String time);
 
     @GET("/station/select") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.
-    Call<AlarmDTO> getAlarmData(@Query("optimizedRoute")RouteDTO optimizedRoute,
+    Call<AlarmDTO> getAlarmData(@Query("optimizedRoute")Object optimizedRoute,
                                 @Query("alarmsetting")boolean alarmsetting);
 
     @GET("/station/StationTimeInfo") // 여기에는 실제 서버의 엔드포인트 경로를 넣어야 합니다.

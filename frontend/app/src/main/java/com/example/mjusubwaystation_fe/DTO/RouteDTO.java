@@ -2,10 +2,11 @@ package com.example.mjusubwaystation_fe.DTO;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RouteDTO {
+public class RouteDTO implements Serializable {
 
     @SerializedName("start")
     private int start;

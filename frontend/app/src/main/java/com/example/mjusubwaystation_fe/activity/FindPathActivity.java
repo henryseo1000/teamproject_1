@@ -72,6 +72,7 @@ public class FindPathActivity extends AppCompatActivity {
     private NotificationManager notificationManager;
     private AlarmManager alarmManager;
     private NotificationCompat.Builder n_builder;
+    private RouteDTO result_dto;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,17 +93,17 @@ public class FindPathActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if (response.isSuccessful()) {
-                    RouteDTO result = response.body();
-                    shortest_path = toArrayListI(result.getShortestPath());
-                    totalLineList = toArrayListI(result.getTotalLineList());
-                    totalTimeList = new ArrayList<>(result.getShortestTime());
+                    result_dto = response.body();
+                    shortest_path = toArrayListI(result_dto.getShortestPath());
+                    totalLineList = toArrayListI(result_dto.getTotalLineList());
+                    totalTimeList = new ArrayList<>(result_dto.getShortestTime());
 
-                    time = result.getTime();
-                    expense = result.getTotalPrice();
-                    transfer = result.getTransferCount();
-                    distance = result.getDistance();
+                    time = result_dto.getTime();
+                    expense = result_dto.getTotalPrice();
+                    transfer = result_dto.getTransferCount();
+                    distance = result_dto.getDistance();
                     setContent();
-                    Log.d(TAG, "성공 : \n" + result.toString());
+                    Log.d(TAG, "성공 : \n" + result_dto.toString());
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(FindPathActivity.this);
                     builder.setMessage(startpoint + "또는 " + destination + "은(는) 노선도에 존재하지 않습니다. 노선도를 다시 확인해주세요.");
@@ -199,6 +200,7 @@ public class FindPathActivity extends AppCompatActivity {
         transfer = intent.getIntExtra("transfer", 0);
         alarmTime = intent.getStringExtra("alarmTime");
         distance = intent.getIntExtra("distance", 0);
+        result_dto = (RouteDTO) intent.getSerializableExtra("result_dto");
 
         startpoint_input.setText(Integer.toString(startpoint));
         destination_input.setText(Integer.toString(destination));
@@ -209,18 +211,7 @@ public class FindPathActivity extends AppCompatActivity {
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RouteDTO dto = new RouteDTO();
-                dto.setStart(startpoint);
-                dto.setEnd(destination);
-                dto.setDistance(distance);
-                dto.setShortestPath(new LinkedList<Integer>(shortest_path));
-                dto.setExpense(expense);
-                dto.setShortestTime(totalTimeList);
-                dto.setTotalLineList(totalLineList);
-                dto.setTransferCount(transfer);
-                dto.setTime(time);
-
-                call_alarm = service1.getAlarmData(dto, true);
+                call_alarm = service1.getAlarmData(result_dto, true);
                 call_alarm.enqueue(alarm_fun);
             }
         });
