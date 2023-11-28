@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class AlarmDTO {
-
-
     @SerializedName("alarmSetting")
     private boolean alarmSetting;
     @SerializedName("boardingTimeList")

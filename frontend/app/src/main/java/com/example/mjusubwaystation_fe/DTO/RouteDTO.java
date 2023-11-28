@@ -62,6 +62,42 @@ public class RouteDTO {
         return expense;
     }
 
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public void setEnd(int end) {
+        this.end = end;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public void setExpense(int expense) {
+        this.expense = expense;
+    }
+
+    public void setTransferCount(int transferCount) {
+        this.transferCount = transferCount;
+    }
+
+    public void setShortestPath(LinkedList<Integer> shortestPath) {
+        this.shortestPath = shortestPath;
+    }
+
+    public void setShortestTime(List<String> shortestTime) {
+        this.shortestTime = shortestTime;
+    }
+
+    public void setTotalLineList(List<Integer> totalLineList) {
+        this.totalLineList = totalLineList;
+    }
+
     public int getDistance() {
         return distance;
     }

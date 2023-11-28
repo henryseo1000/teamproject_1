@@ -109,12 +109,13 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("startpoint", path_result.getStart());
                     intent.putExtra("destination", path_result.getEnd());
                     intent.putExtra("time", path_result.getTime());
-                    intent.putExtra("path", toArrayListS(path_result.getShortestPath()));
+                    intent.putExtra("path", toArrayListI(path_result.getShortestPath()));
                     intent.putExtra("totalLineList", toArrayListI(path_result.getTotalLineList()));
                     intent.putExtra("totalTimeList", toArrayListS(path_result.getShortestTime()));
                     intent.putExtra("expense", path_result.getTotalPrice());
                     intent.putExtra("transfer", path_result.getTransferCount());
                     intent.putExtra("alarmTime", time_text);
+                    intent.putExtra("distance", path_result.getDistance());
 
                     startActivity(intent);
                 }

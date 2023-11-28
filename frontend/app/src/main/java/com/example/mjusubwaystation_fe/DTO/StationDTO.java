@@ -24,4 +24,16 @@ public class StationDTO {
     public int getNowStation() {
         return nowStation;
     }
+
+    public void setNowStation(int nowStation) {
+        this.nowStation = nowStation;
+    }
+
+    public void setLineList(List<Integer> lineList) {
+        this.lineList = lineList;
+    }
+
+    public void setSurroundStationList(List<List<Integer>> surroundStationList) {
+        this.surroundStationList = surroundStationList;
+    }
 }
