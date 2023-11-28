@@ -54,11 +54,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
-    public TextView api_textview;
+    public TextView api_textview, Show_Time_Text;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
-    private String option = "최소시간";
+    private String option = "최소시간", setting_time = "", alarmTime;
     private ArrayList<String> shortest_path;
     private ArrayList<Integer> totalLineList;
     private ArrayList<String> totalTimeList;
@@ -130,6 +130,7 @@ public class FindPathActivity extends AppCompatActivity {
         startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
         destination_input = (EditText) findViewById(R.id.edit_destination);
         choose_path = (Button)findViewById(R.id.btn_choose_path);
+        Show_Time_Text = (TextView) findViewById(R.id.Show_Time_Text);
 
         show_time.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,6 +141,7 @@ public class FindPathActivity extends AppCompatActivity {
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                 now.setHours(hourOfDay);
                                 now.setMinutes(minute);
+                                Show_Time_Text.setText("출발 시간 : " + hourOfDay + ":" + minute);
                                 Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getHours() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
                             }
                         },alarmHour, alarmMinute, false);
@@ -156,14 +158,20 @@ public class FindPathActivity extends AppCompatActivity {
         totalTimeList = intent.getStringArrayListExtra("totalTimeList");
         expense = intent.getIntExtra("expense", 0);
         transfer = intent.getIntExtra("transfer", 0);
+        alarmTime = intent.getStringExtra("alarmTime");
 
         startpoint_input.setText(Integer.toString(startpoint));
         destination_input.setText(Integer.toString(destination));
+        Show_Time_Text.setText("출발 시간 : " + alarmTime);
+
 
         setContent();
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //call = service1.getAlarmData();
+                now = new Date();
+
                 showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
                 setAlarm("2023-11-27 20:08:00");
 
@@ -235,24 +243,8 @@ public class FindPathActivity extends AppCompatActivity {
     }
 
     public void setAlarm(String from) {
-        //AlarmReceiver에 값 전달
-        Intent receiverIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        //날짜 포맷을 바꿔주는 소스코드
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date datetime = now;
-        try {
-            datetime = dateFormat.parse(from);
-        } catch (java.text.ParseException e) {
-            e.printStackTrace();
-        }
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(datetime);
-        Log.d(TAG, "알람 세팅 시간은 : " + datetime);
-
-        alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+        AlarmReceiver ar = new AlarmReceiver();
+        //ar.setAlarm();
     }
 
     private String toTime(int seconds){
@@ -278,7 +270,6 @@ public class FindPathActivity extends AppCompatActivity {
         // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
         listview2.setAdapter(adapter);
     }
-
 
     private void showDialog(){
         a_builder = new AlertDialog.Builder(this);

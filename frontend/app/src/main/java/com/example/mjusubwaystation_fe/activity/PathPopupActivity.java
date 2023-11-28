@@ -88,4 +88,8 @@ public class PathPopupActivity extends Activity {
 
     }
 
+    private void findStation(int line){
+
+    }
+
 }
