@@ -37,9 +37,9 @@ public class DetailPathActivity extends AppCompatActivity {
         expense_val = findViewById(R.id.expense_val);
         transfer_val = findViewById(R.id.transfer_val);
 
-        startpoint_val.setText(""+startpoint);
-        destination_val.setText(""+destination);
-        expense_val.setText(""+expense);
-        transfer_val.setText(""+transfer);
+        startpoint_val.setText("" + startpoint);
+        destination_val.setText("" + destination);
+        expense_val.setText("" + expense);
+        transfer_val.setText("" + transfer);
     }
 }

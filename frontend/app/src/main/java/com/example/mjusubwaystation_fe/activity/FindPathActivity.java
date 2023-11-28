@@ -138,9 +138,9 @@ public class FindPathActivity extends AppCompatActivity {
                         (FindPathActivity.this, new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                now.setTime(hourOfDay);
+                                now.setHours(hourOfDay);
                                 now.setMinutes(minute);
-                                Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getTime() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getHours() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
                             }
                         },alarmHour, alarmMinute, false);
                 timePickerDialog.show();
