@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.example.mjusubwaystation_fe.R;
 
@@ -16,6 +17,7 @@ public class DetailPathActivity extends AppCompatActivity {
     ArrayList<String> shortest_path;
     int expense;
     int transfer;
+    TextView startpoint_val, destination_val, expense_val, transfer_val;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,14 @@ public class DetailPathActivity extends AppCompatActivity {
         expense = intent.getIntExtra("expense", 0);
         transfer = intent.getIntExtra("transfer", 0);
 
+        startpoint_val = findViewById(R.id.startpoint_val);
+        destination_val = findViewById(R.id.destination_val);
+        expense_val = findViewById(R.id.expense_val);
+        transfer_val = findViewById(R.id.transfer_val);
 
+        startpoint_val.setText(""+startpoint);
+        destination_val.setText(""+destination);
+        expense_val.setText(""+expense);
+        transfer_val.setText(""+transfer);
     }
 }

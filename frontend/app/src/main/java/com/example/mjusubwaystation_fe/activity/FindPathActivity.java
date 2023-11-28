@@ -55,7 +55,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview;
-    private Button choose_path, btn_dialog, find_path_retry;
+    private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
     private String option = "최소시간";
@@ -66,7 +66,6 @@ public class FindPathActivity extends AppCompatActivity {
     private ListView listview2;
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
     private AlertDialog.Builder a_builder;
-    private TextView show_time;
     private Call<RouteDTO> call;
     private Date now;
     private NotificationManager notificationManager;
@@ -126,7 +125,7 @@ public class FindPathActivity extends AppCompatActivity {
                 showDialog();
             }
         });
-        show_time = (TextView) findViewById(R.id.Show_Time);
+        show_time = (Button) findViewById(R.id.Show_Time);
         find_path_retry = (Button)findViewById(R.id.find_path_retry);
         startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
         destination_input = (EditText) findViewById(R.id.edit_destination);
@@ -141,7 +140,7 @@ public class FindPathActivity extends AppCompatActivity {
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                 now.setTime(hourOfDay);
                                 now.setMinutes(minute);
-                                Toast.makeText(getApplicationContext(), "설정된 시간은 : " + hourOfDay + "시 " + minute + "분입니다.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getTime() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
                             }
                         },alarmHour, alarmMinute, false);
                 timePickerDialog.show();
@@ -199,6 +198,7 @@ public class FindPathActivity extends AppCompatActivity {
 
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                     String gettime = format.format(now);
+                    Log.d(TAG, "시간 " + gettime + "으로 요청 보내기");
 
                     call = service1.getPathData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
                     call.enqueue(fun);

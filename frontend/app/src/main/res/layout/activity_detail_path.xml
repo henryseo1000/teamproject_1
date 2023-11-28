@@ -13,7 +13,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="230dp"
+            android:layout_height="200dp"
             android:orientation="vertical"
             android:padding="20dp"
             android:background="#ffffff"
@@ -51,7 +51,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="출발지"
                         android:textSize="20sp" />
 
                     <TextView
@@ -59,7 +58,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="도착지"
                         android:textSize="20sp" />
                 </TableRow>
             </TableLayout>
