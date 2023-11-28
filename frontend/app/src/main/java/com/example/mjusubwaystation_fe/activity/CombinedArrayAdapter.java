@@ -16,17 +16,24 @@ class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {
     private Context context;
     private List<CombinedItem> combinedItems;
 
-    public CombinedArrayAdapter(Context context, int resource, List<CombinedItem> objects) {
+    private int type;
+
+    public CombinedArrayAdapter(Context context, int resource, List<CombinedItem> objects, int type) {
         super(context, resource, objects);
         this.context = context;
         this.combinedItems = objects;
+        this.type = type;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.custom_list_item, parent, false);
-
+        View rowView;
+        if (type == 1){
+            rowView = inflater.inflate(R.layout.custom_list_item, parent, false);
+        } else {
+            rowView = inflater.inflate(R.layout.custom_list_item2, parent, false);
+        }
         ImageView imageView = rowView.findViewById(R.id.imageView);
         TextView textView = rowView.findViewById(R.id.textView_list);
 

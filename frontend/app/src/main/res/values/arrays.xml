@@ -48,6 +48,44 @@
         <item>@drawable/routeline8</item>
         <item>@drawable/routeline9</item>
         <item>@drawable/blanknode</item>
+        <item>@drawable/blank</item>
+        <!-- 나머지 이미지들도 동일하게 추가 -->
+    </array>
+
+    <array name="startnode_images">
+        <item>@drawable/startnode1</item>
+        <item>@drawable/startnode2</item>
+        <item>@drawable/startnode3</item>
+        <item>@drawable/startnode4</item>
+        <item>@drawable/startnode5</item>
+        <item>@drawable/startnode6</item>
+        <item>@drawable/startnode7</item>
+        <item>@drawable/startnode8</item>
+        <item>@drawable/startnode9</item>
+        <!-- 나머지 이미지들도 동일하게 추가 -->
+    </array>
+    <array name="centernode_images">
+        <item>@drawable/centernode1</item>
+        <item>@drawable/centernode2</item>
+        <item>@drawable/centernode3</item>
+        <item>@drawable/centernode4</item>
+        <item>@drawable/centernode5</item>
+        <item>@drawable/centernode6</item>
+        <item>@drawable/centernode7</item>
+        <item>@drawable/centernode8</item>
+        <item>@drawable/centernode9</item>
+        <!-- 나머지 이미지들도 동일하게 추가 -->
+    </array>
+    <array name="endnode_images">
+        <item>@drawable/endnode1</item>
+        <item>@drawable/endnode2</item>
+        <item>@drawable/endnode3</item>
+        <item>@drawable/endnode4</item>
+        <item>@drawable/endnode5</item>
+        <item>@drawable/endnode6</item>
+        <item>@drawable/endnode7</item>
+        <item>@drawable/endnode8</item>
+        <item>@drawable/endnode9</item>
         <!-- 나머지 이미지들도 동일하게 추가 -->
     </array>
 </resources>

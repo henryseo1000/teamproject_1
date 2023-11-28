@@ -45,7 +45,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private TextView output, settings;
-    public static int station = 0;
+    public static int station = 0, prev_station = 0, next_station = 0, selected_line = 0;
     public static EditText startpoint_input, destination_input;
     public Button find_path, swap_path;
     public static String startpoint, destination;
@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     Callback path_fun, station_fun;
 
     private ArrayList<Integer> stationlines;
+    private ArrayList<ArrayList<Integer>> station_list;
     private int[] surroundstation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +137,38 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<StationDTO> call, Response<StationDTO> response) {
                 if(response.isSuccessful()){
                     station_result = response.body();
-                    stationlines = getline(station_result);
+                    stationlines = new ArrayList<>(station_result.getLineList());
+                    station_list = getline(station_result.getSurroundStationList());
+                    selected_line = stationlines.get(0);
+
+                    if(stationlines.size() == 1){
+                        if(station_list.get(0).get(0) == 0){
+                            prev_station = 0;
+                            next_station = station_list.get(1).get(0);
+                        }
+                        else if(station_list.get(1).get(0) == 0){
+                            prev_station = station_list.get(0).get(0);
+                            next_station = 0;
+                        }
+                        else {
+                            prev_station = station_list.get(0).get(0);
+                            next_station = station_list.get(1).get(0);
+                        }
+                    }
+                    else{
+                        if(station_list.get(0).get(0) == 0){
+                            prev_station = 0;
+                            next_station = station_list.get(1).get(0);
+                        }
+                        else if(station_list.get(1).get(0) == 0){
+                            prev_station = station_list.get(0).get(0);
+                            next_station = 0;
+                        }
+                        else {
+                            prev_station = station_list.get(0).get(0);
+                            next_station = station_list.get(1).get(0);
+                        }
+                    }
 
                     mOnPopupClick(station);
                     Log.d(TAG, "각 호선은 : " + stationlines.toString());
@@ -241,6 +273,8 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("Y", curY);
         intent.putExtra("station", station);
         intent.putExtra("lines", stationlines);
+        intent.putExtra("prev", prev_station);
+        intent.putExtra("next", next_station);
 
         //intent.putExtra("result", station_result.getSurroundStationList());
         startActivity(intent);
@@ -657,26 +691,20 @@ public class MainActivity extends AppCompatActivity {
         else if(curX > 0.4721985 && curY > 0.19258478 && curX < 0.49926758 && curY < 0.22704199){
             station = 904;
         }
-
-
         else {
             station = NULL;
         }
     }
 
-    private ArrayList getline(StationDTO result){
-        ArrayList<Integer> line_list= new ArrayList<>();
-        int length = result.getSurroundStationList().size();
-        int count = 0;
+    private ArrayList getline(List<List<Integer>> lines){
+        ArrayList line_list = new ArrayList<>(lines);
 
-        line_list.add(result.getSurroundStationList().get(count).get(1));
-        for(int i = 0; i < length; i++){
-            if(result.getSurroundStationList().get(count).get(1) != result.getSurroundStationList().get(i).get(1)){
-                line_list.add(result.getSurroundStationList().get(i).get(1));
-                count ++;
+        for(int i = 0; i < lines.size(); i++){
+            for(int j = 0; j < lines.get(i).size(); j++){
+                ArrayList<Integer> temp = new ArrayList<>(lines.get(i));
+                line_list.set(i, temp);
             }
         }
-
         return line_list;
     }
 }

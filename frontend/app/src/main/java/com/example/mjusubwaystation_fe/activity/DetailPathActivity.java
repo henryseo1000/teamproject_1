@@ -52,7 +52,6 @@ public class DetailPathActivity extends AppCompatActivity {
         expense_val = findViewById(R.id.expense_val);
         transfer_val = findViewById(R.id.transfer_val);
         detailListview = findViewById(R.id.detaillistview);
-
         startpoint_val.setText(""+startpoint);
         destination_val.setText(""+destination);
         expense_val.setText(""+expense);
@@ -67,10 +66,10 @@ public class DetailPathActivity extends AppCompatActivity {
         List<CombinedItem> combinedItemList = new ArrayList<>();
         TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
 
-        TypedArray typedArrayNodeStart = getResources().obtainTypedArray(R.array.routenodestart_images);
-        TypedArray typedArrayNodeCenter = getResources().obtainTypedArray(R.array.routenodecenter_images);
-        TypedArray typedArrayNodeEnd = getResources().obtainTypedArray(R.array.routenodeend_images);
-        int temp = 9;
+        TypedArray typedArrayNodeStart = getResources().obtainTypedArray(R.array.startnode_images);
+        TypedArray typedArrayNodeCenter = getResources().obtainTypedArray(R.array.centernode_images);
+        TypedArray typedArrayNodeEnd = getResources().obtainTypedArray(R.array.endnode_images);
+        int temp = 9, temp2 =10;
         int blankIndex = typedArrayLine.getResourceId( temp, 0);
 
         //totalLineList를 조건에 맞춰 나타내기 위해 갱신함
@@ -101,9 +100,11 @@ public class DetailPathActivity extends AppCompatActivity {
             if (compLine == 0) {
                 resourceIdNode = typedArrayNodeEnd.getResourceId(defaultLine - 1, 0);
                 combinedItemList.add(new CombinedItem(resourceIdNode, stationS));
-                Log.d(TAG, "예상 오류 시작 지점 ");
-                combinedItemList.add(new CombinedItem(blankIndex, ""));
-                Log.d(TAG, "예상 오류 종료 지점 ");
+                if (i != modifyTotalList.size()-1){
+                    combinedItemList.add(new CombinedItem(blankIndex, ""));
+                } else {
+                    combinedItemList.add(new CombinedItem(typedArrayLine.getResourceId( temp2, 0), ""));
+                }
                 continue;
             }
 
@@ -135,7 +136,7 @@ public class DetailPathActivity extends AppCompatActivity {
         List<CombinedItem> combinedItemList = createCombinedItemList(path);
 
         // 결합된 데이터를 표시할 어댑터 생성
-        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList);
+        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList,2);
 
         // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
         detailListview.setAdapter(adapter);

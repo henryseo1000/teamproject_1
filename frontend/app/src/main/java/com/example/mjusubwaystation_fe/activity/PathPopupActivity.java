@@ -15,13 +15,9 @@ import com.example.mjusubwaystation_fe.R;
 import java.util.ArrayList;
 
 public class PathPopupActivity extends Activity {
-
     private TextView Title, Content, Prev, Next;
-
-
     public Button time_table, set_as_start, set_as_dest;
-
-
+    private int prev_station = 0, next_station = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +26,7 @@ public class PathPopupActivity extends Activity {
         setContentView(R.layout.activity_path_popup);
         set_as_start = (Button) findViewById(R.id.set_as_start);
         set_as_dest = (Button) findViewById(R.id.set_as_dest);
-        time_table = (Button) findViewById(R.id.time_table); // 추가된 부분
+        time_table = (Button) findViewById(R.id.time_table);
 
         Title = (TextView) findViewById(R.id.Title);
         Content = (TextView) findViewById(R.id.name);
@@ -46,17 +42,18 @@ public class PathPopupActivity extends Activity {
         for(int i = 0; i < line_list.size(); i++){
             line += line_list.get(i) + "호선 | ";
         }
+        prev_station = intent.getIntExtra("prev", 0);
+        next_station = intent.getIntExtra("next", 0);
+
         Title.setText(line);
+        Prev.setText("이전역\n" + prev_station);
+        Next.setText("다음역\n" + next_station);
 
         int station = intent.getIntExtra("station", 0);
 
         if(station != NULL) {
             Content.setText("" + station);
         }
-
-
-
-
 
         set_as_start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,9 +62,6 @@ public class PathPopupActivity extends Activity {
                 finish();
             }
         });
-
-
-
 
         set_as_dest.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -140,9 +140,9 @@ public class FindPathActivity extends AppCompatActivity {
                         (FindPathActivity.this, new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                now.setTime(hourOfDay);
+                                now.setHours(hourOfDay);
                                 now.setMinutes(minute);
-                                Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getTime() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getHours() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
                             }
                         },alarmHour, alarmMinute, false);
                 timePickerDialog.show();
@@ -277,7 +277,7 @@ public class FindPathActivity extends AppCompatActivity {
         List<CombinedItem> combinedItemList = createCombinedItemList(path);
 
         // 결합된 데이터를 표시할 어댑터 생성
-        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList);
+        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList,1);
 
         // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
         listview2.setAdapter(adapter);
