@@ -1,5 +1,7 @@
 package com.example.mjusubwaystation_fe.activity;
 
+import com.example.mjusubwaystation_fe.activity.CombinedItem;
+
 import static android.content.ContentValues.TAG;
 
 import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListI;
@@ -170,6 +172,8 @@ public class FindPathActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), DetailPathActivity.class);
                 intent.putExtra("startpoint", startpoint);
                 intent.putExtra("destination", destination);
+                intent.putExtra("totalLineList", totalLineList);
+                intent.putExtra("totalTimeList", totalTimeList);
                 intent.putExtra("time", time);
                 intent.putExtra("path", shortest_path);
                 intent.putExtra("expense", expense);
@@ -273,7 +277,7 @@ public class FindPathActivity extends AppCompatActivity {
         List<CombinedItem> combinedItemList = createCombinedItemList(path);
 
         // 결합된 데이터를 표시할 어댑터 생성
-        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList);
+        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList,1);
 
         // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
         listview2.setAdapter(adapter);
@@ -384,50 +388,3 @@ public class FindPathActivity extends AppCompatActivity {
     ///////////////////////테스트////////////////////////////////////////////////////////
 }
 
-
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
-class CombinedItem {
-    private int imageResource;
-    private String text;
-
-    public CombinedItem(int imageResource, String text) {
-        this.imageResource = imageResource;
-        this.text = text;
-    }
-
-    public int getImageResource() {
-        return imageResource;
-    }
-
-    public String getText() {return text;}
-}
-
-class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {
-    private Context context;
-    private List<CombinedItem> combinedItems;
-
-    public CombinedArrayAdapter(Context context, int resource, List<CombinedItem> objects) {
-        super(context, resource, objects);
-        this.context = context;
-        this.combinedItems = objects;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.custom_list_item, parent, false);
-
-        ImageView imageView = rowView.findViewById(R.id.imageView);
-        TextView textView = rowView.findViewById(R.id.textView_list);
-
-        // Set image and text for the combined item
-        CombinedItem combinedItem = combinedItems.get(position);
-        imageView.setImageResource(combinedItem.getImageResource());
-        textView.setText(combinedItem.getText());
-
-        return rowView;
-    }
-}
