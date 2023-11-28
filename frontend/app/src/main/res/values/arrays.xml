@@ -47,6 +47,7 @@
         <item>@drawable/routeline7</item>
         <item>@drawable/routeline8</item>
         <item>@drawable/routeline9</item>
+        <item>@drawable/blanknode</item>
         <!-- 나머지 이미지들도 동일하게 추가 -->
     </array>
 </resources>
