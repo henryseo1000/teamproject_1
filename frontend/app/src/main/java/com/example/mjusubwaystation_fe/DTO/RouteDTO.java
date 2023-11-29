@@ -106,4 +106,8 @@ public class RouteDTO implements Serializable {
     public int getTransferCount() {
         return transferCount;
     }
+
+    public int getExpense() {
+        return expense;
+    }
 }

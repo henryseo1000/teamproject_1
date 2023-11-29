@@ -67,7 +67,7 @@ public class FindPathActivity extends AppCompatActivity {
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
     private AlertDialog.Builder a_builder;
     private Call<RouteDTO> call_route;
-    private Call<AlarmDTO> call_alarm;
+    private Call<RouteDTO> call_alarm;
     private Date now;
     private NotificationManager notificationManager;
     private AlarmManager alarmManager;
@@ -118,12 +118,12 @@ public class FindPathActivity extends AppCompatActivity {
             }
         };
 
-        Callback alarm_fun = new Callback<AlarmDTO>() {
+        Callback alarm_fun = new Callback<RouteDTO>() {
             @Override
-            public void onResponse(Call<AlarmDTO> call, Response<AlarmDTO> response) {
+            public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if (response.isSuccessful()) {
-                    AlarmDTO result = response.body();
-                    result.getBoardingTimeList();
+                    RouteDTO result = response.body();
+                    result.getShortestTime();
                     setContent();
                     now = new Date();
 
@@ -150,7 +150,7 @@ public class FindPathActivity extends AppCompatActivity {
                 }
             }
             @Override
-            public void onFailure(Call<AlarmDTO> call, Throwable t) {
+            public void onFailure(Call<RouteDTO> call, Throwable t) {
                 Log.d(TAG, "onFailure : " + t.getMessage());
             }
         };
@@ -211,7 +211,8 @@ public class FindPathActivity extends AppCompatActivity {
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                call_alarm = service1.getAlarmData(result_dto, true);
+                Log.d(TAG, "result_dto : " + result_dto.toString());
+                call_alarm = service1.getPathData(startpoint, destination, option, alarmTime);
                 call_alarm.enqueue(alarm_fun);
             }
         });

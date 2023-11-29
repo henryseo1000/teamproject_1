@@ -313,7 +313,6 @@ public class MainActivity extends AppCompatActivity {
         return path_list;
     }
 
-
     public static void pressed_location(float curX, float curY){
         if(curX > 0.038879395 && curY > 0.4860061 && curX < 0.056935627 && curY < 0.5073234){ // 101
             station = 101;
