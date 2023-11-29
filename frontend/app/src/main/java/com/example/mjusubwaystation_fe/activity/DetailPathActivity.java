@@ -80,7 +80,7 @@ public class DetailPathActivity extends AppCompatActivity {
 
         //화면의 역 배열에 맞게 시간표 재조정 -------------------------> 되는지 확인하기
         ArrayList<String> modifyTimeList = modifyTimeList(totalTimeList);
-
+        Log.d(TAG, "수정된  total : " + modifyTotalList);
 
         //첫번째 역에 대한 호선 정보 ( 변하지 않음 )
         int defaultLine = totalLineList.get(1);
@@ -100,10 +100,10 @@ public class DetailPathActivity extends AppCompatActivity {
             String stationS = String.valueOf(station);
 
 
-            //끝 역(line==0)인 경우
+            //끊기는 역(line==0)인 경우
             if (compLine == 0) {
                 resourceIdNode = typedArrayNodeEnd.getResourceId(defaultLine - 1, 0);
-                combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdNode, stationS));
+                combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdNode, stationS+"       -        "+modifyTimeList.get(i-1)));
                 if (i != modifyTotalList.size()-1){
                     combinedItemList.add(new CombinedItem2(transferIndex,blankIndex, ""));
                 } else {
@@ -123,7 +123,7 @@ public class DetailPathActivity extends AppCompatActivity {
                 resourceIdNode = typedArrayNodeStart.getResourceId(compLine - 1, 0);
                 resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
                 resourceIdLinetext = typedArrayNodeLine.getResourceId(compLine - 1, 0);
-                combinedItemList.add(new CombinedItem2(resourceIdLinetext,resourceIdNode, stationS));
+                combinedItemList.add(new CombinedItem2(resourceIdLinetext,resourceIdNode, stationS+"       -        "+modifyTimeList.get(i-1)));
                 combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdLine, ""));
                 //기준 값 변경함
                 defaultLine = compLine;
@@ -191,19 +191,24 @@ public class DetailPathActivity extends AppCompatActivity {
                 String defaultTime = totalTimeList.get(i-1);
                 String compTime = totalTimeList.get(i);
 
-                if (defaultTime == compTime){
+                Log.d(TAG, "도착시간  : " + defaultTime);
+                Log.d(TAG, "출발시간  : " + compTime);
+                if (defaultTime.equals(compTime)){
                     modifyList.add(defaultTime);
                     modifyList.add(compTime);
                 } else {
                     modifyList.add(defaultTime);
-                    modifyList.add("0");
+                    modifyList.add(defaultTime);
                     modifyList.add("0");
                     modifyList.add(compTime);
                 }
 
                 if (i == totalTimeList.size()-2){
                     modifyList.add(totalTimeList.get(i+1));
+                    modifyList.add(totalTimeList.get(i+1));
+                    modifyList.add(totalTimeList.get(i+1));
                 }
+                Log.d(TAG, "-------------------");
             }
         }
         Log.d(TAG, "수정된 리스트  : " + modifyList);

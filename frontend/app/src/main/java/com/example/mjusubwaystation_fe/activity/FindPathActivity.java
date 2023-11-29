@@ -6,6 +6,9 @@ import static android.content.ContentValues.TAG;
 import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListI;
 import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListS;
 
+import com.example.mjusubwaystation_fe.service.CombinedArrayAdapter;
+import com.example.mjusubwaystation_fe.service.CombinedItem;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
@@ -24,14 +27,10 @@ import android.os.Build;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;

@@ -1,6 +1,6 @@
-package com.example.mjusubwaystation_fe.activity;
+package com.example.mjusubwaystation_fe.service;
 
-class CombinedItem {
+public class CombinedItem {
     private int imageResource;
     private String text;
 

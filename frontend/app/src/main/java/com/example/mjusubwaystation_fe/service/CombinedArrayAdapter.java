@@ -1,4 +1,4 @@
-package com.example.mjusubwaystation_fe.activity;
+package com.example.mjusubwaystation_fe.service;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,10 +9,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mjusubwaystation_fe.R;
+import com.example.mjusubwaystation_fe.service.CombinedItem;
 
 import java.util.List;
 
-class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {
+public class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {
     private Context context;
     private List<CombinedItem> combinedItems;
 

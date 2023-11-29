@@ -12,7 +12,7 @@ import com.example.mjusubwaystation_fe.R;
 
 import java.util.List;
 
-class CombinedArrayAdapter2 extends ArrayAdapter<CombinedItem2> {
+public class CombinedArrayAdapter2 extends ArrayAdapter<CombinedItem2> {
     private Context context;
     private List<CombinedItem2> combinedItems;
 
