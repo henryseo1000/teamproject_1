@@ -88,4 +88,18 @@
         <item>@drawable/endnode9</item>
         <!-- 나머지 이미지들도 동일하게 추가 -->
     </array>
+
+    <array name="line_images">
+        <item>@drawable/line1</item>
+        <item>@drawable/line2</item>
+        <item>@drawable/line3</item>
+        <item>@drawable/line4</item>
+        <item>@drawable/line5</item>
+        <item>@drawable/line6</item>
+        <item>@drawable/line7</item>
+        <item>@drawable/line8</item>
+        <item>@drawable/line9</item>
+        <item>@drawable/line10</item>
+        <!-- 나머지 이미지들도 동일하게 추가 -->
+    </array>
 </resources>

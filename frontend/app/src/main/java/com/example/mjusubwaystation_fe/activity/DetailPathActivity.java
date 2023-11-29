@@ -61,37 +61,41 @@ public class DetailPathActivity extends AppCompatActivity {
 
 
 
-    private List<CombinedItem> createCombinedItemList(ArrayList<String> path) {
+    private List<CombinedItem2> createCombinedItemList(ArrayList<String> path) {
 
-        List<CombinedItem> combinedItemList = new ArrayList<>();
+        List<CombinedItem2> combinedItemList = new ArrayList<>();
         TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
 
         TypedArray typedArrayNodeStart = getResources().obtainTypedArray(R.array.startnode_images);
         TypedArray typedArrayNodeCenter = getResources().obtainTypedArray(R.array.centernode_images);
         TypedArray typedArrayNodeEnd = getResources().obtainTypedArray(R.array.endnode_images);
+        TypedArray typedArrayNodeLine = getResources().obtainTypedArray(R.array.line_images);
         int temp = 9, temp2 =10;
         int blankIndex = typedArrayLine.getResourceId( temp, 0);
+        int blankIndex2 = typedArrayLine.getResourceId( temp2, 0);
+        int transferIndex = typedArrayNodeLine.getResourceId(temp, 0);
 
         //totalLineList를 조건에 맞춰 나타내기 위해 갱신함
         ArrayList<Integer> modifyTotalList = modifyTotalLineList(totalLineList);
+
+        //화면의 역 배열에 맞게 시간표 재조정 -------------------------> 되는지 확인하기
+        ArrayList<String> modifyTimeList = modifyTimeList(totalTimeList);
+
 
         //첫번째 역에 대한 호선 정보 ( 변하지 않음 )
         int defaultLine = totalLineList.get(1);
         int resourceIdNode = typedArrayNodeStart.getResourceId(defaultLine - 1, 0);
         int resourceIdLine = typedArrayLine.getResourceId(defaultLine - 1, 0);
-        combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(0)+"       -        "+totalTimeList.get(0))); // modifyPath에 해당하는 텍스트 추가
-        combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+        int resourceIdLinetext = typedArrayNodeLine.getResourceId(defaultLine - 1, 0);
+        combinedItemList.add(new CombinedItem2(resourceIdLinetext,resourceIdNode, shortest_path.get(0)+"       -        "+totalTimeList.get(0))); // modifyPath에 해당하는 텍스트 추가
+        combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdLine, ""));
 
         //그 이후의 역에 대해서 이미지 및 텍스트를 결합하여 CombinedItem 추가
         int k=2;    // 시간에 대한 순서 (나중에 생각)
         for (int i = 3; i < modifyTotalList.size(); i = i + 2) {
-            Log.d(TAG, "---------------------------------");
-            Log.d(TAG, "현재 i 는 " + i);
             int compLine = modifyTotalList.get(i);
             int station= modifyTotalList.get(i-1);
 
-            Log.d(TAG, "기준 line 는 " + defaultLine);
-            Log.d(TAG, "비교 line 는 " + compLine);
             //역 타입을 String으로 변환 ( 화면에 띄우기 위해)
             String stationS = String.valueOf(station);
 
@@ -99,11 +103,12 @@ public class DetailPathActivity extends AppCompatActivity {
             //끝 역(line==0)인 경우
             if (compLine == 0) {
                 resourceIdNode = typedArrayNodeEnd.getResourceId(defaultLine - 1, 0);
-                combinedItemList.add(new CombinedItem(resourceIdNode, stationS));
+                combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdNode, stationS));
                 if (i != modifyTotalList.size()-1){
-                    combinedItemList.add(new CombinedItem(blankIndex, ""));
+                    combinedItemList.add(new CombinedItem2(transferIndex,blankIndex, ""));
                 } else {
-                    combinedItemList.add(new CombinedItem(typedArrayLine.getResourceId( temp2, 0), ""));
+                    //걷는 그림 넣음
+                    combinedItemList.add(new CombinedItem2(blankIndex2,typedArrayLine.getResourceId( temp2, 0), ""));
                 }
                 continue;
             }
@@ -112,13 +117,14 @@ public class DetailPathActivity extends AppCompatActivity {
             if (compLine == defaultLine) {   //이전 역과 같은 경우
                 resourceIdNode = typedArrayNodeCenter.getResourceId(compLine - 1, 0);
                 resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
-                combinedItemList.add(new CombinedItem(resourceIdNode, stationS));
-                combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+                combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdNode, stationS));
+                combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdLine, ""));
             } else {    //이전 역과 다른 경우 == 환승
                 resourceIdNode = typedArrayNodeStart.getResourceId(compLine - 1, 0);
                 resourceIdLine = typedArrayLine.getResourceId(compLine - 1, 0);
-                combinedItemList.add(new CombinedItem(resourceIdNode, stationS));
-                combinedItemList.add(new CombinedItem(resourceIdLine, ""));
+                resourceIdLinetext = typedArrayNodeLine.getResourceId(compLine - 1, 0);
+                combinedItemList.add(new CombinedItem2(resourceIdLinetext,resourceIdNode, stationS));
+                combinedItemList.add(new CombinedItem2(blankIndex2,resourceIdLine, ""));
                 //기준 값 변경함
                 defaultLine = compLine;
             }
@@ -133,18 +139,16 @@ public class DetailPathActivity extends AppCompatActivity {
     }
 
     private void setPath(ArrayList<String> path){
-        List<CombinedItem> combinedItemList = createCombinedItemList(path);
+        List<CombinedItem2> combinedItemList = createCombinedItemList(path);
 
         // 결합된 데이터를 표시할 어댑터 생성
-        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList,2);
+        CombinedArrayAdapter2 adapter = new CombinedArrayAdapter2(this, android.R.layout.simple_list_item_1, combinedItemList);
 
         // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
         detailListview.setAdapter(adapter);
     }
 
 
-    //  전 101, 1, 123, 1, 122 , 2 , ...
-    //  후 101, 1, 123, 1, 122 , 0 , 122, 2
     // 만약 기존 것과 다르면, 현재 역 하나 추가하고, 뒤에는 0을 붙임 구리고 해당 역
     private ArrayList<Integer> modifyTotalLineList(ArrayList<Integer> totalLineList){
         int defaultLine = totalLineList.get(1);
@@ -167,6 +171,39 @@ public class DetailPathActivity extends AppCompatActivity {
             } else {
                 modifyList.add(station);
                 modifyList.add(compLine);
+            }
+        }
+        Log.d(TAG, "수정된 리스트  : " + modifyList);
+        return modifyList;
+    }
+
+    private ArrayList<String> modifyTimeList(ArrayList<String> totalTimeList){
+        ArrayList<String> modifyList = new ArrayList<>();
+
+        if (totalTimeList.size() == 2){
+            modifyList.add(totalTimeList.get(0));
+            modifyList.add(totalTimeList.get(1));
+        } else {
+            modifyList.add(totalTimeList.get(0));
+
+            Log.d(TAG, "기존 리스트  : " + totalTimeList);
+            for (int i = 2; i < totalTimeList.size(); i = i + 2) {
+                String defaultTime = totalTimeList.get(i-1);
+                String compTime = totalTimeList.get(i);
+
+                if (defaultTime == compTime){
+                    modifyList.add(defaultTime);
+                    modifyList.add(compTime);
+                } else {
+                    modifyList.add(defaultTime);
+                    modifyList.add("0");
+                    modifyList.add("0");
+                    modifyList.add(compTime);
+                }
+
+                if (i == totalTimeList.size()-2){
+                    modifyList.add(totalTimeList.get(i+1));
+                }
             }
         }
         Log.d(TAG, "수정된 리스트  : " + modifyList);

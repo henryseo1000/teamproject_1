@@ -7,16 +7,23 @@
     android:padding="0dp">
 
     <ImageView
+        android:id="@+id/imageView_line"
+        android:layout_width="12dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="50dp"
+        app:srcCompat="@drawable/blanknode" />
+
+    <ImageView
         android:id="@+id/imageView"
         android:layout_width="40dp"
         android:layout_height="43dp"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="30dp"
         app:srcCompat="@drawable/blanknode" />
 
     <TextView
         android:id="@+id/textView_list"
-        android:layout_width="280dp"
+        android:layout_width="180dp"
         android:layout_height="43dp"
         android:gravity="center_vertical"
         android:layout_marginStart="20dp"
