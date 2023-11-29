@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Integer> stationlines;
     private ArrayList<ArrayList<Integer>> station_list;
+    private ArrayList<Integer> modify_list;
     private int[] surroundstation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                     station_result = response.body();
                     stationlines = new ArrayList<>(station_result.getLineList());
                     station_list = getline(station_result.getSurroundStationList());
+                    modify_list = modifySurroundList(station_result.getSurroundStationList());
                     selected_line = stationlines.get(0);
 
                     if(stationlines.size() == 1){
@@ -170,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    mOnPopupClick(station);
+                    mOnPopupClick(station,modify_list);
                     Log.d(TAG, "각 호선은 : " + stationlines.toString());
                     Log.d(TAG, "성공 : \n" + station_result.getSurroundStationList().toString());
                 }
@@ -267,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //터치 시 팝업
-    public void mOnPopupClick(int station){
+    public void mOnPopupClick(int station,ArrayList<Integer> surrList){
         Intent intent = new Intent(this, PathPopupActivity.class);
         intent.putExtra("X", curX);
         intent.putExtra("Y", curY);
@@ -275,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("lines", stationlines);
         intent.putExtra("prev", prev_station);
         intent.putExtra("next", next_station);
-
+        intent.putExtra("surrList", surrList);
         //intent.putExtra("result", station_result.getSurroundStationList());
         startActivity(intent);
     }
@@ -707,4 +709,24 @@ public class MainActivity extends AppCompatActivity {
         }
         return line_list;
     }
+
+
+    private ArrayList<Integer> modifySurroundList(List<List<Integer>> lines){
+        ArrayList<Integer> modifyList = new ArrayList<>();
+
+        if (lines.size() == 4) {
+            modifyList.add(lines.get(0).get(1));
+            modifyList.add(lines.get(0).get(0));
+            modifyList.add(lines.get(1).get(0));
+            modifyList.add(lines.get(2).get(1));
+            modifyList.add(lines.get(2).get(0));
+            modifyList.add(lines.get(3).get(0));
+        } else {
+            modifyList.add(lines.get(0).get(1));
+            modifyList.add(lines.get(0).get(0));
+            modifyList.add(lines.get(1).get(0));
+        }
+        return modifyList;
+    }
+
 }
