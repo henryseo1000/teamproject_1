@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 @Controller
@@ -28,7 +29,6 @@ public class StationController {
     private final AlarmService alarmService;
     private OptimizedRoute optimizedRoute_;
 
-///////////////////////////// 모바일 통신 메서드 //////////////////////////////////////////////////
 
     @Operation(summary = "최적 경로 찾기", description = "최적의 경로를 찾아 보여준다.")
     @ApiResponses({
@@ -41,14 +41,13 @@ public class StationController {
     public ResponseEntity<OptimizedRoute> getRouteData(@RequestParam int start,
                                                        @RequestParam int end,
                                                        @RequestParam String type,
-                                                       @RequestParam String time) throws IOException {
+                                                       @RequestParam String time) throws IOException, ParseException {
         optimizedRoute_ = routeService.search(start,end,type,time);
         System.out.println("optimizedRoute_ = " + optimizedRoute_.getTotalLineList());
         return new ResponseEntity<>(optimizedRoute_, HttpStatus.OK);
     }
 
 
-    ///////////////////////////// 모바일 통신 메서드 /////////////////////////////////////////////////
     @Operation(summary = "알람데이터 가져오기", description = "알람 시간데이터를 가져온다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -66,8 +65,6 @@ public class StationController {
         return new ResponseEntity<>(alarmDTO, HttpStatus.OK);
     }
 
-
-    ///////////////////////////// 모바일 통신 메서드 /////////////////////////////////////////////////
     @Operation(summary = "특정 역 정보 가져오기", description = "특정 역의 정보를 가져온다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK"),

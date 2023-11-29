@@ -78,30 +78,63 @@ public class RouteService {
     static List<Integer> totalLineList;
     static List<Integer> stationGap;
 
+
     //위의 findAll에 대해 특정 시간을 필터링 ( 시간 비교해서 제일 빠른 출발시간)
     public void getShortestTime(List<Integer> totalLineList, String now_time){
         shortestTime = new ArrayList<>();
         List<StationTimeEntity> stationTimeEntityList = stationTimeRepository.findAll();
 
+        //기준 시간
         String compareTime = now_time;
         List<StationTimeDTO> stationTimeList =findAllTime(stationTimeEntityList);
+
+        //환승하면, 갱신될 호선
+        int std = 0;
+
+        // 각 역에 대해서 반복
         for(int i=0;i<totalLineList.size();i=i+2){
             int station = totalLineList.get(i);
             int line = totalLineList.get(i+1);
             int gap = stationGap.get(i+1);
-            for(StationTimeDTO stationTimeDTO : stationTimeList){
-                String start_time = stationTimeDTO.getStart_time();
-                if ( (stationTimeDTO.getDirection() == line) && (stationTimeDTO.getStation_id() == station) && (start_time.compareTo(compareTime) > 0) ){
-                    shortestTime.add(start_time);
-                    compareTime = addSecondsToTime(start_time, gap);
-                    shortestTime.add(compareTime);
-                    break;
-                }
+
+            //만약 다른 호선으로 이동할 경우, 환승 시간을 고려해서 출발시간을 조정함
+            if (std != line){
+                //도착 시간을 갱신함
+                compareTime =  stationBoardingTime(stationTimeList, station, line, gap, compareTime);
+                std = line;
+                System.out.println("갱신한 호선 = " + std);
+                // 동일 호선으로 이동할 경우
+            } else {
+                System.out.println(" 동일 호선 이동 ");
+                //출발시간 저장
+                shortestTime.add(compareTime);
+                compareTime = addSecondsToTime(compareTime,gap);
+                //도착시간 저장
+                shortestTime.add(compareTime);
             }
         }
     }
 
-    public OptimizedRoute search(int start, int end, String type, String time) throws IOException {
+    //다른 호선으로 이동할 경우 사용하는 메서드 
+    public String stationBoardingTime(List<StationTimeDTO> stationTimeList, int station, int line, int gap, String time) {
+        for(StationTimeDTO stationTimeDTO : stationTimeList){
+            String start_time = stationTimeDTO.getStart_time();
+            if ( (stationTimeDTO.getDirection() == line) && (stationTimeDTO.getStation_id() == station) && (start_time.compareTo(time) > 0) ){
+                //출발시간
+                shortestTime.add(start_time);
+                time = addSecondsToTime(start_time, gap);
+                //도착시간
+                shortestTime.add(time);
+                break;
+            }
+        }
+        //해당 열차의 도착 시간을 반환
+        return time;
+    }
+
+
+
+    public OptimizedRoute search(int start, int end, String type, String time) throws IOException, ParseException {
         totalLineList = new ArrayList<>();
         System.out.println("time = " + time);
 
@@ -146,19 +179,20 @@ public class RouteService {
 
         }
         int transferCount=0;
-
+        int timeGap = 0;
         dijkstra(start, end);
         List<Integer> totalList = getTotal();
         getTotalGapList(shortestPath);
         totalLineList = transferCalculate.getTransfer(shortestPath,stationDTOList);
         transferCount = transferCalculate.getTransferCount(totalLineList);
         getShortestTime(totalLineList, time);
-        return OptimizedRoute.setResult(start,end,totalList.get(0), totalList.get(1), totalList.get(2),transferCount,shortestPath,shortestTime,totalLineList);
+        timeGap = calculateTimeGap(shortestTime.get(1), shortestTime.get(shortestTime.size()-1));
+        return OptimizedRoute.setResult(start,end,timeGap, totalList.get(0), totalList.get(1),transferCount,shortestPath,shortestTime,totalLineList);
     }
 
 
+    //역과 역 사이의 걸리는 시간 ---> 형식 : [역1, 소요시간, 역2, 소요시간, ...]
     private void getTotalGapList(LinkedList<Integer> shortestPath) {
-
         stationGap = new ArrayList<>();
         int i;
         for (i = 0; i < shortestPath.size() - 1; i++) {
@@ -177,9 +211,10 @@ public class RouteService {
 
     }
 
+    // 시간, 거리, 비용 데이터를 한번에 저장함.
     private List<Integer> getTotal() {
         List<Integer> totalList = new ArrayList<>();
-        int time=0, distance=0, expense=0;
+        int distance=0, expense=0;
         for (int i = 0; i < shortestPath.size() - 1; i++) {
 
             int start = shortestPath.get(i);
@@ -187,13 +222,11 @@ public class RouteService {
             for (StationDTO stationDTO : findAllType()) {
                 int compA = stationDTO.getStart(); int compB =  stationDTO.getEnd();
                 if ( (compA==start && compB== end) || (compA==end && compB==start)) {
-                    time += stationDTO.getTime();
                     distance += stationDTO.getDistance();
                     expense += stationDTO.getExpense();
                 }
             }
         }
-        totalList.add(time);
         totalList.add(distance);
         totalList.add(expense);
         return totalList;
@@ -237,7 +270,7 @@ public class RouteService {
         shortestPath.addFirst(start);
     }
 
-    public static String addSecondsToTime(String time, int secondsToAdd) {
+    public String addSecondsToTime(String time, int secondsToAdd) {
         try {
             // 문자열을 Date 객체로 파싱
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
@@ -258,6 +291,18 @@ public class RouteService {
             return null;
         }
     }
+
+    public int calculateTimeGap(String time1, String time2) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+        Date date1 = sdf.parse(time1);
+        Date date2 = sdf.parse(time2);
+
+        long differenceInMillis = date2.getTime() - date1.getTime();
+        return (int) (differenceInMillis / 1000);
+    }
+
+
 }
 
 
