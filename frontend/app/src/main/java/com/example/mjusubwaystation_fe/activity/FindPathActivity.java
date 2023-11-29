@@ -1,6 +1,5 @@
 package com.example.mjusubwaystation_fe.activity;
 
-import com.example.mjusubwaystation_fe.activity.CombinedItem;
 
 import static android.content.ContentValues.TAG;
 
