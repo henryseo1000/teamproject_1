@@ -64,9 +64,11 @@
             <Button
                 android:id="@+id/find_path_retry"
                 android:layout_width="match_parent"
+                android:layout_height="40dp"
                 android:text="경로 재검색" />
-
         </LinearLayout>
+
+
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -12,7 +12,6 @@ import com.example.mjusubwaystation_fe.service.CombinedItem;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
-import androidx.core.net.ParseException;
 
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
@@ -23,6 +22,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.icu.util.Calendar;
 import android.os.Build;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -37,7 +37,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.mjusubwaystation_fe.DTO.AlarmDTO;
 import com.example.mjusubwaystation_fe.R;
 import com.example.mjusubwaystation_fe.service.AlarmReceiver;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
@@ -46,7 +45,6 @@ import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -56,27 +54,24 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
-    public TextView api_textview, Show_Time_Text, filter;
+    public TextView api_textview;
     public TextView type,startTime, totalTime, totalExpense, totalDistance;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
-    private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer, distance, uniqueId = 0;
-    private String option = "최소시간", setting_time = "", alarmTime;
-    private ArrayList<Integer> shortest_path;
+    private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
+    private String option = "최소시간";
+    private ArrayList<String> shortest_path;
     private ArrayList<Integer> totalLineList;
-    private ArrayList<String> totalTimeList, alarmList;
+    private ArrayList<String> totalTimeList;
     private LinearLayout content;
     private ListView listview2;
     private String[] filters = {"최소시간", "최소비용", "최단거리"};
     private AlertDialog.Builder a_builder;
-    private Call<RouteDTO> call_route;
-    private Call<RouteDTO> call_alarm;
+    private Call<RouteDTO> call;
     private Date now;
     private NotificationManager notificationManager;
     private AlarmManager alarmManager;
     private NotificationCompat.Builder n_builder;
-    private RouteDTO result_dto;
-  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,21 +88,20 @@ public class FindPathActivity extends AppCompatActivity {
         notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
-        Callback path_fun = new Callback<RouteDTO>() {
+        Callback fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if (response.isSuccessful()) {
-                    result_dto = response.body();
-                    shortest_path = toArrayListI(result_dto.getShortestPath());
-                    totalLineList = toArrayListI(result_dto.getTotalLineList());
-                    totalTimeList = new ArrayList<>(result_dto.getShortestTime());
+                    RouteDTO result = response.body();
+                    shortest_path = toArrayListS(result.getShortestPath());
+                    totalLineList = toArrayListI(result.getTotalLineList());
+                    totalTimeList = new ArrayList<>(result.getShortestTime());
 
-                    time = result_dto.getTime();
-                    expense = result_dto.getTotalPrice();
-                    transfer = result_dto.getTransferCount();
-                    distance = result_dto.getDistance();
+                    time = result.getTime();
+                    expense = result.getTotalPrice();
+                    transfer = result.getTransferCount();
                     setContent();
-                    Log.d(TAG, "성공 : \n" + result_dto.toString());
+                    Log.d(TAG, "성공 : \n" + result.toString());
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(FindPathActivity.this);
                     builder.setMessage(startpoint + "또는 " + destination + "은(는) 노선도에 존재하지 않습니다. 노선도를 다시 확인해주세요.");
@@ -121,43 +115,8 @@ public class FindPathActivity extends AppCompatActivity {
                 Log.d(TAG, "onFailure : " + t.getMessage());
             }
         };
-      
-        Callback alarm_fun = new Callback<RouteDTO>() {
-            @Override
-            public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
-                if (response.isSuccessful()) {
-                    RouteDTO result = response.body();
 
-                    setAlarm(new ArrayList<>(result.getShortestTime()));
-
-                    showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
-
-                    Intent intent = new Intent(getApplicationContext(), DetailPathActivity.class);
-                    intent.putExtra("startpoint", startpoint);
-                    intent.putExtra("destination", destination);
-                    intent.putExtra("time", time);
-                    intent.putExtra("path", shortest_path);
-                    intent.putExtra("expense", expense);
-                    intent.putExtra("transfer", transfer);
-
-                    startActivity(intent);
-
-                    Log.d(TAG, "성공 : \n" + result.toString());
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FindPathActivity.this);
-                    builder.setMessage("통신 오류입니다. 잠시 뒤에 다시 시도해주세요.");
-                    builder.setTitle("통신 오류");
-                    builder.show();
-                    Log.d(TAG, "실패 : \n");
-                }
-            }
-            @Override
-            public void onFailure(Call<RouteDTO> call, Throwable t) {
-                Log.d(TAG, "onFailure : " + t.getMessage());
-            }
-        };
-
-        //api_textview = (TextView) findViewById(R.id.textView);
+//        api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
         listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
@@ -182,8 +141,6 @@ public class FindPathActivity extends AppCompatActivity {
         startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
         destination_input = (EditText) findViewById(R.id.edit_destination);
         choose_path = (Button)findViewById(R.id.btn_choose_path);
-        Show_Time_Text = (TextView) findViewById(R.id.Show_Time_Text);
-        filter = (TextView) findViewById(R.id.filter);
 
         show_time.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,14 +151,13 @@ public class FindPathActivity extends AppCompatActivity {
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                                 now.setHours(hourOfDay);
                                 now.setMinutes(minute);
-                                Show_Time_Text.setText("출발 시간 : " + hourOfDay + ":" + minute);
                                 Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getHours() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
 
                                 // 시간 설정 후 경로 재검색 버튼 자동으로 누르기
                                 find_path_retry.performClick();
 
                             }
-                        }, alarmHour, alarmMinute, false);
+                        },alarmHour, alarmMinute, false);
                 timePickerDialog.show();
             }
         });
@@ -210,20 +166,14 @@ public class FindPathActivity extends AppCompatActivity {
         time = intent.getIntExtra("time", 0);
         startpoint = intent.getIntExtra("startpoint", 0);
         destination = intent.getIntExtra("destination", 0);
-        shortest_path = intent.getIntegerArrayListExtra("path");
+        shortest_path = intent.getStringArrayListExtra("path");
         totalLineList = intent.getIntegerArrayListExtra("totalLineList");
         totalTimeList = intent.getStringArrayListExtra("totalTimeList");
         expense = intent.getIntExtra("expense", 0);
         transfer = intent.getIntExtra("transfer", 0);
-        alarmTime = intent.getStringExtra("alarmTime");
-        distance = intent.getIntExtra("distance", 0);
-        result_dto = (RouteDTO) intent.getSerializableExtra("result_dto");
 
         startpoint_input.setText(Integer.toString(startpoint));
         destination_input.setText(Integer.toString(destination));
-        Show_Time_Text.setText("출발 시간 : " + alarmTime);
-        filter.setText("최소시간");
-
 
         setContent();
         choose_path.setOnClickListener(new View.OnClickListener() {
@@ -267,8 +217,8 @@ public class FindPathActivity extends AppCompatActivity {
                     String gettime = format.format(now);
                     Log.d(TAG, "시간 " + gettime + "으로 요청 보내기");
 
-                    call_route = service1.getPathData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
-                    call_route.enqueue(path_fun);
+                    call = service1.getPathData(startpoint, destination, option, gettime);// 현재 시간을 디폴트로
+                    call.enqueue(fun);
                 }
                 catch(Exception e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(FindPathActivity.this);
@@ -301,27 +251,25 @@ public class FindPathActivity extends AppCompatActivity {
         notificationManager.notify(0, n_builder.build());
     }
 
-    public void setAlarm(ArrayList<String> yourTimeArray) {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    public void setAlarm(String from) {
+        //AlarmReceiver에 값 전달
+        Intent receiverIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        // 시간 배열에서 각 시간에 대해 알림 설정
-        for (String time : yourTimeArray) {
-            // "HH:mm" 포맷의 문자열을 밀리초로 변환
-            long timeInMillis = convertTimeToMillis(time);
-
-            Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    getApplicationContext(),
-                    uniqueId,  // 고유한 ID로 설정 (각 알림에 대해 다른 ID 사용)
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
-
-            // AlarmManager에 알림 설정
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
-            uniqueId++;
-            Log.d(TAG,"시간 : " + timeInMillis + ", ID : " + uniqueId);
+        //날짜 포맷을 바꿔주는 소스코드
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date datetime = now;
+        try {
+            datetime = dateFormat.parse(from);
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
         }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(datetime);
+        Log.d(TAG, "알람 세팅 시간은 : " + datetime);
+
+        alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
     }
 
     private String toTime(int seconds){
@@ -345,7 +293,7 @@ public class FindPathActivity extends AppCompatActivity {
         return str;
     }
 
-    private void setPath(ArrayList<Integer> path){
+    private void setPath(ArrayList<String> path){
         List<CombinedItem> combinedItemList = createCombinedItemList(path);
 
         // 결합된 데이터를 표시할 어댑터 생성
@@ -354,6 +302,7 @@ public class FindPathActivity extends AppCompatActivity {
         // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
         listview2.setAdapter(adapter);
     }
+
 
     private void showDialog(){
         a_builder = new AlertDialog.Builder(this);
@@ -373,11 +322,7 @@ public class FindPathActivity extends AppCompatActivity {
                     option = "최단거리";
                 }
                 Toast.makeText(getApplicationContext(), "다시 검색하시면 " + filters[which] + " 옵션으로 검색됩니다.", Toast.LENGTH_SHORT).show();
-
-                filter.setText(option);
-
                 find_path_retry.performClick();
-
             }
         });
 
@@ -387,11 +332,20 @@ public class FindPathActivity extends AppCompatActivity {
 
     private void setContent(){
         setPath(shortest_path);
+//        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
+//                + time + "초\n약 " + toTime(time) + " 소요됩니다."
+//        + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
+
         type.setText("---");
         startTime.setText("---");
         totalTime.setText(toTime(time));
         totalExpense.setText(expense+"원");
         totalDistance.setText(""+transfer);
+
+
+
+
+
     }
 
     public ArrayList modifyPath (ArrayList<String> path){
@@ -409,28 +363,9 @@ public class FindPathActivity extends AppCompatActivity {
         return modifyPath;
     }
 
-    private long convertTimeToMillis(String time) {
-        try {
-            // "HH:mm" 포맷의 문자열을 밀리초로 변환
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-            int hour = Integer.parseInt(time.substring(0,2));
-            int minute = Integer.parseInt(time.substring(3,5));
-            Date date = new Date();
-
-            date.setHours(hour);
-            date.setMinutes(minute);
-            date.setSeconds(0);
-
-            Log.d(TAG, date.toString());
-            return date.getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
     ///////////////////////테스트////////////////////////////////////////////////////////
-    private List<CombinedItem> createCombinedItemList(ArrayList<Integer> path) {
+    private List<CombinedItem> createCombinedItemList(ArrayList<String> path) {
+
         List<CombinedItem> combinedItemList = new ArrayList<>();
         TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
 
