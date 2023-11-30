@@ -13,15 +13,18 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:orientation="vertical"
-            android:padding="20dp"
+            android:layout_height="188dp"
             android:background="#ffffff"
-            android:elevation="5dp">
+            android:elevation="5dp"
+            android:orientation="vertical"
+            android:padding="20dp">
+
             <TableLayout
-                android:stretchColumns="*"
                 android:layout_width="match_parent"
-                android:layout_height="100dp">
+                android:layout_height="71dp"
+                android:layout_marginBottom='15dp'
+                android:stretchColumns="*">
+
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -42,29 +45,32 @@
                         android:text="도착지"
                         android:textSize="15sp" />
                 </TableRow>
+
                 <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="57dp">
+
                     <TextView
                         android:id="@+id/startpoint_val"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="49dp"
                         android:gravity="center"
                         android:textSize="20sp" />
 
                     <TextView
                         android:id="@+id/destination_val"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="49dp"
                         android:gravity="center"
                         android:textSize="20sp" />
                 </TableRow>
             </TableLayout>
 
             <TableLayout
-                android:stretchColumns="*"
                 android:layout_width="match_parent"
-                android:layout_height="100dp">
+                android:layout_height="71dp"
+                android:stretchColumns="*">
+
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -85,21 +91,22 @@
                         android:text="환승역 개수"
                         android:textSize="15sp" />
                 </TableRow>
+
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/expense_val"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="75dp"
+                        android:layout_height="49dp"
                         android:gravity="center"
                         android:textSize="20sp" />
 
                     <TextView
                         android:id="@+id/transfer_val"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="49dp"
                         android:gravity="center"
                         android:textSize="20sp" />
                 </TableRow>
@@ -112,18 +119,14 @@
             android:orientation="vertical"
             android:background="#ffffff"
             android:id="@+id/content">
-            <TextView
-                android:id="@+id/textView"
+
+            <Space
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:paddingLeft="20dp"
-                android:paddingTop="10dp"
-                android:textSize="15sp"
-                android:textColor="@color/black"
-                tools:layout_editor_absoluteX="168dp"
-                tools:layout_editor_absoluteY="123dp" />
+                android:layout_height="40dp" />
+
             <ListView
-                android:id="@+id/listview"
+                android:id="@+id/detaillistview"
+                android:divider="@android:color/transparent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </LinearLayout>

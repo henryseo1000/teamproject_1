@@ -1,9 +1,13 @@
 package com.example.mjusubwaystation_fe.activity;
 
+
 import static android.content.ContentValues.TAG;
 
 import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListI;
 import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListS;
+
+import com.example.mjusubwaystation_fe.service.CombinedArrayAdapter;
+import com.example.mjusubwaystation_fe.service.CombinedItem;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,14 +25,10 @@ import android.os.Build;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -54,7 +54,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
-    public TextView api_textview, Show_Time_Text;
+    public TextView api_textview;
+    public TextView type,startTime, totalTime, totalExpense, totalDistance;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer, distance;
@@ -73,6 +74,7 @@ public class FindPathActivity extends AppCompatActivity {
     private AlarmManager alarmManager;
     private NotificationCompat.Builder n_builder;
     private RouteDTO result_dto;
+  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,7 +119,7 @@ public class FindPathActivity extends AppCompatActivity {
                 Log.d(TAG, "onFailure : " + t.getMessage());
             }
         };
-
+      
         Callback alarm_fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
@@ -155,10 +157,20 @@ public class FindPathActivity extends AppCompatActivity {
             }
         };
 
-        api_textview = (TextView) findViewById(R.id.textView);
+        //api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
         listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
+
+
+        type = (TextView) findViewById(R.id.type);
+        startTime = (TextView) findViewById(R.id.start_time);
+        totalTime = (TextView) findViewById(R.id.total_time);
+        totalExpense = (TextView) findViewById(R.id.total_expense);
+        totalDistance = (TextView) findViewById(R.id.total_distance);
+
+        
+        //시간설정
         btn_dialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -183,6 +195,10 @@ public class FindPathActivity extends AppCompatActivity {
                                 now.setMinutes(minute);
                                 Show_Time_Text.setText("출발 시간 : " + hourOfDay + ":" + minute);
                                 Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getHours() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
+
+                                // 시간 설정 후 경로 재검색 버튼 자동으로 누르기
+                                find_path_retry.performClick();
+
                             }
                         }, alarmHour, alarmMinute, false);
                 timePickerDialog.show();
@@ -211,9 +227,20 @@ public class FindPathActivity extends AppCompatActivity {
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "result_dto : " + result_dto.toString());
-                call_alarm = service1.getPathData(startpoint, destination, option, alarmTime);
-                call_alarm.enqueue(alarm_fun);
+                showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                setAlarm("2023-11-27 20:08:00");
+
+                Intent intent = new Intent(getApplicationContext(), DetailPathActivity.class);
+                intent.putExtra("startpoint", startpoint);
+                intent.putExtra("destination", destination);
+                intent.putExtra("totalLineList", totalLineList);
+                intent.putExtra("totalTimeList", totalTimeList);
+                intent.putExtra("time", time);
+                intent.putExtra("path", shortest_path);
+                intent.putExtra("expense", expense);
+                intent.putExtra("transfer", transfer);
+
+                startActivity(intent);
             }
         });
 
@@ -281,6 +308,7 @@ public class FindPathActivity extends AppCompatActivity {
         int hours = 0;
         int minutes = 0;
         int left = 0;
+        String str = "";
 
         hours = seconds / 3600;
         left = seconds % 3600;
@@ -288,14 +316,20 @@ public class FindPathActivity extends AppCompatActivity {
         minutes = left / 60;
         left = left % 60;
 
-        return hours + "시간 " + minutes + "분 "+ left + "초";
+        if (hours == 0){
+            str = minutes+"분";
+        } else {
+            str = hours + "시간 " + hours + "분";
+        }
+
+        return str;
     }
 
     private void setPath(ArrayList<Integer> path){
         List<CombinedItem> combinedItemList = createCombinedItemList(path);
 
         // 결합된 데이터를 표시할 어댑터 생성
-        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList);
+        CombinedArrayAdapter adapter = new CombinedArrayAdapter(this, android.R.layout.simple_list_item_1, combinedItemList,1);
 
         // 결합된 항목을 표시할 단일 ListView 또는 다른 레이아웃 사용
         listview2.setAdapter(adapter);
@@ -319,6 +353,7 @@ public class FindPathActivity extends AppCompatActivity {
                     option = "최단거리";
                 }
                 Toast.makeText(getApplicationContext(), "다시 검색하시면 " + filters[which] + " 옵션으로 검색됩니다.", Toast.LENGTH_SHORT).show();
+                find_path_retry.performClick();
             }
         });
 
@@ -328,9 +363,11 @@ public class FindPathActivity extends AppCompatActivity {
 
     private void setContent(){
         setPath(shortest_path);
-        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
-                + time + "초\n약 " + toTime(time) + " 소요됩니다. 거리는 " + distance
-        + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
+        type.setText("---");
+        startTime.setText("---");
+        totalTime.setText(toTime(time));
+        totalExpense.setText(expense+"원");
+        totalDistance.setText(""+transfer);
     }
 
     public ArrayList modifyPath (ArrayList<String> path){
@@ -405,50 +442,3 @@ public class FindPathActivity extends AppCompatActivity {
     ///////////////////////테스트////////////////////////////////////////////////////////
 }
 
-
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
-class CombinedItem {
-    private int imageResource;
-    private String text;
-
-    public CombinedItem(int imageResource, String text) {
-        this.imageResource = imageResource;
-        this.text = text;
-    }
-
-    public int getImageResource() {
-        return imageResource;
-    }
-
-    public String getText() {return text;}
-}
-
-class CombinedArrayAdapter extends ArrayAdapter<CombinedItem> {
-    private Context context;
-    private List<CombinedItem> combinedItems;
-
-    public CombinedArrayAdapter(Context context, int resource, List<CombinedItem> objects) {
-        super(context, resource, objects);
-        this.context = context;
-        this.combinedItems = objects;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.custom_list_item, parent, false);
-
-        ImageView imageView = rowView.findViewById(R.id.imageView);
-        TextView textView = rowView.findViewById(R.id.textView_list);
-
-        // Set image and text for the combined item
-        CombinedItem combinedItem = combinedItems.get(position);
-        imageView.setImageResource(combinedItem.getImageResource());
-        textView.setText(combinedItem.getText());
-
-        return rowView;
-    }
-}

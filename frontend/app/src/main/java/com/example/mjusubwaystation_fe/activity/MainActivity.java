@@ -17,6 +17,7 @@ import android.view.View;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Button;
@@ -47,12 +48,14 @@ public class MainActivity extends AppCompatActivity {
     private TextView output, settings;
     public static int station = 0, prev_station = 0, next_station = 0, selected_line = 0;
     public static EditText startpoint_input, destination_input;
-    public Button find_path, swap_path;
-    public static String startpoint, destination, time_text;
+    public Button find_path;
+    public ImageButton swap_path;
+    public static String startpoint, destination;
     public Call<RouteDTO> getPath;
     public Call<StationDTO> getStationInfo;
     private RouteDTO path_result;
     private StationDTO station_result;
+    private int nowLine;
     float curX, curY;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -62,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Integer> stationlines;
     private ArrayList<ArrayList<Integer>> station_list;
+    private ArrayList<Integer> modify_list;
     private int[] surroundstation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,9 +86,9 @@ public class MainActivity extends AppCompatActivity {
         PhotoViewAttacher attacher = new PhotoViewAttacher(photoView);
 
         // 위젯에 대한 참조.
-        output = (TextView) findViewById(R.id.output);
+//        output = (TextView) findViewById(R.id.output);
         find_path = (Button) findViewById(R.id.find_path);
-        swap_path = (Button) findViewById(R.id.swap);
+        swap_path = (ImageButton) findViewById(R.id.swap);
         startpoint_input = (EditText) findViewById(R.id.edit_startpoint);
         destination_input = (EditText) findViewById(R.id.edit_destination);
         settings = (TextView) findViewById(R.id.settings);
@@ -142,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                     station_result = response.body();
                     stationlines = new ArrayList<>(station_result.getLineList());
                     station_list = getline(station_result.getSurroundStationList());
+                    modify_list = modifySurroundList(station_result.getSurroundStationList());
                     selected_line = stationlines.get(0);
 
                     if(station_list.get(0).get(0) == 0){
@@ -157,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                         next_station = station_list.get(1).get(0);
                     }
 
-                    mOnPopupClick(station);
+                    mOnPopupClick(station,modify_list);
                     Log.d(TAG, "각 호선은 : " + stationlines.toString());
                     Log.d(TAG, "성공 : \n" + station_result.getSurroundStationList().toString());
                 }
@@ -230,10 +235,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         attacher.setOnPhotoTapListener(new OnPhotoTapListener() {
-            private void printString(String s) {
-                //좌표 출력
-                output.setText(s); //한 줄씩 추가
-            }
+//            private void printString(String s) {
+//                //좌표 출력
+//                output.setText(s); //한 줄씩 추가
+//            }
             @Override
             public void onPhotoTap(ImageView view, float x, float y) {
                 curX = x;  //눌린 곳의 X좌표
@@ -242,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
 
                 pressed_location(curX, curY);
 
-                printString("손가락 눌림 : " + curX + ", " + curY);
+//                printString("손가락 눌림 : " + curX + ", " + curY);
                 Log.d(TAG,"손가락 눌림 : " + curX + ", " + curY);
 
                 if(station != NULL) {
@@ -254,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //터치 시 팝업
-    public void mOnPopupClick(int station){
+    public void mOnPopupClick(int station,ArrayList<Integer> surrList){
         Intent intent = new Intent(this, PathPopupActivity.class);
         intent.putExtra("X", curX);
         intent.putExtra("Y", curY);
@@ -262,7 +267,8 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("lines", stationlines);
         intent.putExtra("prev", prev_station);
         intent.putExtra("next", next_station);
-
+        intent.putExtra("surrList", surrList);
+        intent.putExtra("nowline", selected_line);
         //intent.putExtra("result", station_result.getSurroundStationList());
         startActivity(intent);
     }
@@ -693,4 +699,24 @@ public class MainActivity extends AppCompatActivity {
         }
         return line_list;
     }
+
+
+    private ArrayList<Integer> modifySurroundList(List<List<Integer>> lines){
+        ArrayList<Integer> modifyList = new ArrayList<>();
+
+        if (lines.size() == 4) {
+            modifyList.add(lines.get(0).get(1));
+            modifyList.add(lines.get(0).get(0));
+            modifyList.add(lines.get(1).get(0));
+            modifyList.add(lines.get(2).get(1));
+            modifyList.add(lines.get(2).get(0));
+            modifyList.add(lines.get(3).get(0));
+        } else {
+            modifyList.add(lines.get(0).get(1));
+            modifyList.add(lines.get(0).get(0));
+            modifyList.add(lines.get(1).get(0));
+        }
+        return modifyList;
+    }
+
 }
