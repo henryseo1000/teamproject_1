@@ -21,6 +21,7 @@ import java.util.Date;
 
 public class AlarmReceiver extends BroadcastReceiver {
     String title, message;
+    int uniqueId = 0;
 
     public void setTitle(String title) {
         this.title = title;
@@ -55,11 +56,11 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        channel = new NotificationChannel("CHANNEL_ID", "CHANNEL_NAME", NotificationManager.IMPORTANCE_DEFAULT);
+        channel = new NotificationChannel("CHANNEL_ID" + uniqueId, "CHANNEL_NAME" + uniqueId, NotificationManager.IMPORTANCE_DEFAULT);
         notificationManager.createNotificationChannel(channel);
 
         // 알림 생성
-        Notification.Builder notificationBuilder = new Notification.Builder(context, "CHANNEL_ID")
+        Notification.Builder notificationBuilder = new Notification.Builder(context, "CHANNEL_ID" + uniqueId)
                 .setSmallIcon(R.mipmap.ic_launcher)  // 알림 아이콘
                 .setContentTitle(title)
                 .setContentText(message)
