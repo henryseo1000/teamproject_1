@@ -3,7 +3,10 @@ import static android.content.ContentValues.TAG;
 
 import static java.sql.Types.NULL;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.example.mjusubwaystation_fe.R;
@@ -14,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -62,6 +67,15 @@ public class MainActivity extends AppCompatActivity {
     Date now;
     RetrofitInterface service1;
     Callback path_fun, station_fun;
+
+    static final int PERMISSIONS_REQUEST_READ_LOCATION = 0x00000001;
+
+    private String[] PERMISSIONS = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.INTERNET
+    };
 
     private ArrayList<Integer> stationlines;
     private ArrayList<ArrayList<Integer>> station_list;
@@ -256,6 +270,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        ActivityCompat.requestPermissions(this,PERMISSIONS,PERMISSIONS_REQUEST_READ_LOCATION);
     }
 
     //터치 시 팝업

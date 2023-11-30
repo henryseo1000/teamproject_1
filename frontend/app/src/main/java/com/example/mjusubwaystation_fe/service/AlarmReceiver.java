@@ -1,7 +1,6 @@
 package com.example.mjusubwaystation_fe.service;
 
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,92 +8,65 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.icu.util.Calendar;
-import android.os.Build;
-import android.os.SystemClock;
-import android.widget.Toast;
-
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.example.mjusubwaystation_fe.R;
-import com.example.mjusubwaystation_fe.activity.MainActivity;
+import com.example.mjusubwaystation_fe.activity.FindPathActivity;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import android.icu.text.SimpleDateFormat;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
+
 import java.util.Date;
-import java.util.List;
 
 public class AlarmReceiver extends BroadcastReceiver {
-
-    private static final String CHANNEL_ID = "alarm_channel";
+    String title = "지하철 도착 알림!", message = "지하철이 도착할 예정입니다!";
+    int uniqueId = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // 알람이 울릴 때 실행되는 코드
-        showNotification(context, "알람이 울립니다!");
+        // 여기에 알림을 보내는 코드 작성
+        sendNotification(context);
     }
 
-    // 알림을 표시하는 메서드
-    private void showNotification(Context context, String message) {
-        createNotificationChannel(context);
+    private void sendNotification(Context context) {
+        // 알림을 클릭했을 때 실행될 액티비티 설정
+        Intent intent = new Intent(context, FindPathActivity.class);
+        NotificationChannel channel;
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
+        );
+        // 시간을 "HH:mm" 포맷으로 변환
+        String formattedTime = formatTime(System.currentTimeMillis());
 
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+        // 알림 소리 설정
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("지하철 곧 도착 예정입니다!")
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        channel = new NotificationChannel("CHANNEL_ID" + uniqueId, "CHANNEL_NAME" + uniqueId, NotificationManager.IMPORTANCE_DEFAULT);
+        notificationManager.createNotificationChannel(channel);
+
+        // 알림 생성
+        Notification.Builder notificationBuilder = new Notification.Builder(context, "CHANNEL_ID" + uniqueId)
+                .setSmallIcon(R.mipmap.ic_launcher)  // 알림 아이콘
+                .setContentTitle(title)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
+                .setAutoCancel(true)  // 알림을 터치하면 자동으로 삭제
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        notificationManager.notify(1, builder.build());
+        // 알림 표시
+        notificationManager.notify(0, notificationBuilder.build());
     }
 
-    // 알람 설정 메서드
-    public void setAlarm(Context context, List<String> alarmTimes) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-
-        for (String alarmTime : alarmTimes) {
-            Intent intent = new Intent(context, AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-            // 알람 시간 설정
-            alarmManager.set(AlarmManager.RTC_WAKEUP, getAlarmTimeInMillis(alarmTime), pendingIntent);
-        }
-    }
-
-    // 알람 시간 문자열을 밀리초로 변환하는 메서드
-    private long getAlarmTimeInMillis(String alarmTime) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-            Date date = sdf.parse(alarmTime);
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            calendar.set(Calendar.SECOND, 0);
-
-            return calendar.getTimeInMillis();
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    // 알림 채널 생성
-    private void createNotificationChannel(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Alarm Channel";
-            String description = "Channel for alarm notifications";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-
-            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+    private String formatTime(long timeInMillis) {
+        // 시간을 "HH:mm" 포맷으로 변환하는 메서드
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        return sdf.format(new Date(timeInMillis));
     }
 }
