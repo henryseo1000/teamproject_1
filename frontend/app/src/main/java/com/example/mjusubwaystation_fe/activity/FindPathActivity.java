@@ -55,6 +55,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview;
+    public TextView type,startTime, totalTime, totalExpense, totalDistance;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
@@ -115,10 +116,20 @@ public class FindPathActivity extends AppCompatActivity {
             }
         };
 
-        api_textview = (TextView) findViewById(R.id.textView);
+//        api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
         listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
+
+
+        type = (TextView) findViewById(R.id.type);
+        startTime = (TextView) findViewById(R.id.start_time);
+        totalTime = (TextView) findViewById(R.id.total_time);
+        totalExpense = (TextView) findViewById(R.id.total_expense);
+        totalDistance = (TextView) findViewById(R.id.total_distance);
+
+        
+        //시간설정
         btn_dialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,6 +152,10 @@ public class FindPathActivity extends AppCompatActivity {
                                 now.setHours(hourOfDay);
                                 now.setMinutes(minute);
                                 Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getHours() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
+
+                                // 시간 설정 후 경로 재검색 버튼 자동으로 누르기
+                                find_path_retry.performClick();
+
                             }
                         },alarmHour, alarmMinute, false);
                 timePickerDialog.show();
@@ -261,6 +276,7 @@ public class FindPathActivity extends AppCompatActivity {
         int hours = 0;
         int minutes = 0;
         int left = 0;
+        String str = "";
 
         hours = seconds / 3600;
         left = seconds % 3600;
@@ -268,7 +284,13 @@ public class FindPathActivity extends AppCompatActivity {
         minutes = left / 60;
         left = left % 60;
 
-        return hours + "시간 " + minutes + "분 "+ left + "초";
+        if (hours == 0){
+            str = minutes+"분";
+        } else {
+            str = hours + "시간 " + hours + "분";
+        }
+
+        return str;
     }
 
     private void setPath(ArrayList<String> path){
@@ -300,6 +322,7 @@ public class FindPathActivity extends AppCompatActivity {
                     option = "최단거리";
                 }
                 Toast.makeText(getApplicationContext(), "다시 검색하시면 " + filters[which] + " 옵션으로 검색됩니다.", Toast.LENGTH_SHORT).show();
+                find_path_retry.performClick();
             }
         });
 
@@ -309,9 +332,20 @@ public class FindPathActivity extends AppCompatActivity {
 
     private void setContent(){
         setPath(shortest_path);
-        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
-                + time + "초\n약 " + toTime(time) + " 소요됩니다."
-        + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
+//        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
+//                + time + "초\n약 " + toTime(time) + " 소요됩니다."
+//        + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
+
+        type.setText("---");
+        startTime.setText("---");
+        totalTime.setText(toTime(time));
+        totalExpense.setText(expense+"원");
+        totalDistance.setText(""+transfer);
+
+
+
+
+
     }
 
     public ArrayList modifyPath (ArrayList<String> path){

@@ -23,9 +23,9 @@ import com.example.mjusubwaystation_fe.R;
 import java.util.ArrayList;
 
 public class PathPopupActivity extends Activity {
-    private TextView Title, Content, Prev, Next;
+    private TextView Title, Content, Prev, Next, nowLine;
     public Button time_table, set_as_start, set_as_dest, prevStation, nextStation;
-    private int prev_station = 0, next_station = 0;
+    private int prev_station = 0, next_station = 0, now_Line;
     private ArrayList<Integer> surrList;
 
     @Override
@@ -37,6 +37,7 @@ public class PathPopupActivity extends Activity {
         set_as_dest = (Button) findViewById(R.id.set_as_dest);
         time_table = (Button) findViewById(R.id.time_table);
 
+        nowLine = (TextView) findViewById(R.id.nowline);
         Content = (TextView) findViewById(R.id.name);
         Prev = (TextView) findViewById(R.id.Prev);
         Next = (TextView) findViewById(R.id.Next);
@@ -48,10 +49,12 @@ public class PathPopupActivity extends Activity {
 
         prev_station = intent.getIntExtra("prev", 0);
         next_station = intent.getIntExtra("next", 0);
+        now_Line = intent.getIntExtra("nowline", 0);
         surrList = intent.getIntegerArrayListExtra("surrList");
 
         Prev.setText("이전역\n" + prev_station);
         Next.setText("다음역\n" + next_station);
+        nowLine.setText(now_Line+"호선");
 
         int station = intent.getIntExtra("station", 0);
 
@@ -77,14 +80,18 @@ public class PathPopupActivity extends Activity {
 
             int lineTmp = line_list.get(i);
             Button dynamicButton = new Button(this);
-            dynamicButton.setLayoutParams(new ViewGroup.LayoutParams(
-                    dpToPx(90), // 90dp를 픽셀로 변환하여 설정
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    dpToPx(60), // 90dp를 픽셀로 변환하여 설정
                     ViewGroup.LayoutParams.WRAP_CONTENT
-            ));
+            );
+            params.setMargins(0, 0, dpToPx(10), 0); // 간격 설정
+            dynamicButton.setLayoutParams(params);
+
             dynamicButton.setText(lineTmp + "호선");
             dynamicButton.setTextColor(Color.parseColor("#FF6200EE"));
-            dynamicButton.setTextSize(20);
+            dynamicButton.setTextSize(13);
             dynamicButton.setGravity(Gravity.CENTER);
+            dynamicButton.setBackgroundColor(Color.parseColor("#DDDDFF"));
 
             // 동적으로 생성한 버튼에 대한 클릭 이벤트 처리
             dynamicButton.setOnClickListener(new View.OnClickListener() {
@@ -133,18 +140,23 @@ public class PathPopupActivity extends Activity {
     private void onDynamicButtonClick(final int line) {
         // 여기서 Prev와 Next의 값을 업데이트
         int prev=0,next=0;
-        if (surrList.size() ==6){
-            if (surrList.get(0) == line){
-                prev = min(surrList.get(1),surrList.get(2));
-                next = max(surrList.get(1),surrList.get(2));
-            } else if (surrList.get(3) == line){
-                prev = min(surrList.get(4),surrList.get(5));
-                next = max(surrList.get(4),surrList.get(5));
+        if (surrList.size() ==6) {
+            if (surrList.get(0) == line) {
+                prev = min(surrList.get(1), surrList.get(2));
+                next = max(surrList.get(1), surrList.get(2));
+            } else if (surrList.get(3) == line) {
+                prev = min(surrList.get(4), surrList.get(5));
+                next = max(surrList.get(4), surrList.get(5));
             }
-        }
-        Prev.setText("이전역\n" + prev);
-        Next.setText("다음역\n" + next);
 
+            if (prev == 0) {
+                Prev.setText("이전역\n" + "");
+            } else {
+                Prev.setText("이전역\n" + prev);
+            }
+            nowLine.setText(line + "호선");
+            Next.setText("다음역\n" + next);
+        }
     }
 
 
