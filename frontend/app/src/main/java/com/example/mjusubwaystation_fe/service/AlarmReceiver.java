@@ -20,16 +20,8 @@ import android.os.Build;
 import java.util.Date;
 
 public class AlarmReceiver extends BroadcastReceiver {
-    String title, message;
+    String title = "지하철 도착 알림!", message = "지하철이 도착할 예정입니다!";
     int uniqueId = 0;
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 
     @Override
     public void onReceive(Context context, Intent intent) {

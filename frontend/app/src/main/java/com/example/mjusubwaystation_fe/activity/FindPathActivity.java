@@ -56,7 +56,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
-    public TextView api_textview, Show_Time_Text;
+    public TextView api_textview, Show_Time_Text, filter;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer, distance, uniqueId = 0;
@@ -171,6 +171,7 @@ public class FindPathActivity extends AppCompatActivity {
         destination_input = (EditText) findViewById(R.id.edit_destination);
         choose_path = (Button)findViewById(R.id.btn_choose_path);
         Show_Time_Text = (TextView) findViewById(R.id.Show_Time_Text);
+        filter = (TextView) findViewById(R.id.filter);
 
         show_time.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,6 +206,7 @@ public class FindPathActivity extends AppCompatActivity {
         startpoint_input.setText(Integer.toString(startpoint));
         destination_input.setText(Integer.toString(destination));
         Show_Time_Text.setText("출발 시간 : " + alarmTime);
+        filter.setText("최소시간");
 
 
         setContent();
@@ -337,6 +339,7 @@ public class FindPathActivity extends AppCompatActivity {
                     option = "최단거리";
                 }
                 Toast.makeText(getApplicationContext(), "다시 검색하시면 " + filters[which] + " 옵션으로 검색됩니다.", Toast.LENGTH_SHORT).show();
+                filter.setText(option);
             }
         });
 
@@ -376,6 +379,7 @@ public class FindPathActivity extends AppCompatActivity {
 
             date.setHours(hour);
             date.setMinutes(minute);
+            date.setSeconds(0);
 
             Log.d(TAG, date.toString());
             return date.getTime();
@@ -387,7 +391,6 @@ public class FindPathActivity extends AppCompatActivity {
 
     ///////////////////////테스트////////////////////////////////////////////////////////
     private List<CombinedItem> createCombinedItemList(ArrayList<Integer> path) {
-
         List<CombinedItem> combinedItemList = new ArrayList<>();
         TypedArray typedArrayLine = getResources().obtainTypedArray(R.array.routeline_images);
 

@@ -82,8 +82,16 @@
                 android:layout_height="20dp"
                 android:gravity="left"
                 android:layout_marginLeft="10dp"
-                android:textSize="15sp"
+                android:textSize="10sp"
                 android:id="@+id/Show_Time_Text"
+                />
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="20dp"
+                android:gravity="left"
+                android:layout_marginLeft="10dp"
+                android:textSize="10sp"
+                android:id="@+id/filter"
                 />
 
         </LinearLayout>
