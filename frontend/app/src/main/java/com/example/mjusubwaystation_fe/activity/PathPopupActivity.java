@@ -88,10 +88,10 @@ public class PathPopupActivity extends Activity {
             dynamicButton.setLayoutParams(params);
 
             dynamicButton.setText(lineTmp + "호선");
-            dynamicButton.setTextColor(Color.parseColor("#FF6200EE"));
+            dynamicButton.setTextColor(Color.parseColor("#030817"));
             dynamicButton.setTextSize(13);
             dynamicButton.setGravity(Gravity.CENTER);
-            dynamicButton.setBackgroundColor(Color.parseColor("#DDDDFF"));
+            dynamicButton.setBackgroundColor(Color.parseColor("#A2B4E3"));
 
             // 동적으로 생성한 버튼에 대한 클릭 이벤트 처리
             dynamicButton.setOnClickListener(new View.OnClickListener() {

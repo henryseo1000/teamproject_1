@@ -1,6 +1,6 @@
 package com.example.mjusubwaystation_fe.service;
 
-import android.app.AlarmManager;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,52 +8,65 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-
-import androidx.core.app.NotificationCompat;
 
 import com.example.mjusubwaystation_fe.R;
-import com.example.mjusubwaystation_fe.activity.MainActivity;
+import com.example.mjusubwaystation_fe.activity.FindPathActivity;
 
+import android.icu.text.SimpleDateFormat;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
+
+import java.util.Date;
 
 public class AlarmReceiver extends BroadcastReceiver {
-    NotificationManager manager;
-    NotificationCompat.Builder builder;
-
-    //오레오 이상은 반드시 채널을 설정해줘야 Notification이 작동함
-    public final static String CHANNEL_ID = "channel1";
-    public final static String CHANNEL_NAME = "Channel1";
-
+    String title = "지하철 도착 알림!", message = "지하철이 도착할 예정입니다!";
+    int uniqueId = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        // 여기에 알림을 보내는 코드 작성
+        sendNotification(context);
+    }
 
-        builder = null;
-        manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            manager.createNotificationChannel(
-                    new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
-            );
-            builder = new NotificationCompat.Builder(context, CHANNEL_ID);
-        } else {
-            builder = new NotificationCompat.Builder(context);
-        }
+    private void sendNotification(Context context) {
+        // 알림을 클릭했을 때 실행될 액티비티 설정
+        Intent intent = new Intent(context, FindPathActivity.class);
+        NotificationChannel channel;
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
+        );
+        // 시간을 "HH:mm" 포맷으로 변환
+        String formattedTime = formatTime(System.currentTimeMillis());
 
-        //알림창 클릭 시 activity 화면 부름
-        Intent intent2 = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context,101,intent2, PendingIntent.FLAG_IMMUTABLE);
+        // 알림 소리 설정
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        //알림창 제목
-        builder.setContentTitle("알람");
-        //알림창 아이콘
-        builder.setSmallIcon(R.drawable.map);
-        //알림창 터치시 자동 삭제
-        builder.setAutoCancel(true);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        builder.setContentIntent(pendingIntent);
+        channel = new NotificationChannel("CHANNEL_ID" + uniqueId, "CHANNEL_NAME" + uniqueId, NotificationManager.IMPORTANCE_DEFAULT);
+        notificationManager.createNotificationChannel(channel);
 
-        Notification notification = builder.build();
-        manager.notify(1,notification);
+        // 알림 생성
+        Notification.Builder notificationBuilder = new Notification.Builder(context, "CHANNEL_ID" + uniqueId)
+                .setSmallIcon(R.mipmap.ic_launcher)  // 알림 아이콘
+                .setContentTitle(title)
+                .setContentText(message)
+                .setAutoCancel(true)  // 알림을 터치하면 자동으로 삭제
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        // 알림 표시
+        notificationManager.notify(0, notificationBuilder.build());
+    }
+
+    private String formatTime(long timeInMillis) {
+        // 시간을 "HH:mm" 포맷으로 변환하는 메서드
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        return sdf.format(new Date(timeInMillis));
     }
 }

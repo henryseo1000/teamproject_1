@@ -13,7 +13,11 @@ import android.widget.TextView;
 
 import com.example.mjusubwaystation_fe.R;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class DetailPathActivity extends AppCompatActivity {
@@ -24,10 +28,12 @@ public class DetailPathActivity extends AppCompatActivity {
     private int destination;
     private ArrayList<String> shortest_path;
     private ArrayList<String>  totalTimeList;
+    private ArrayList<String>  alarmTimeList;
     private int expense;
     private int transfer;
     private TextView startpoint_val, destination_val, expense_val, transfer_val;
 
+    private String timers;
     private ListView detailListview;
 
     @Override
@@ -45,6 +51,8 @@ public class DetailPathActivity extends AppCompatActivity {
         transfer = intent.getIntExtra("transfer", 0);
         totalLineList = intent.getIntegerArrayListExtra("totalLineList");
         totalTimeList = intent.getStringArrayListExtra("totalTimeList");
+        timers = intent.getStringExtra("timeresult");
+
 
         //화면에 매칭
         startpoint_val = findViewById(R.id.startpoint_val);
@@ -52,10 +60,9 @@ public class DetailPathActivity extends AppCompatActivity {
         expense_val = findViewById(R.id.expense_val);
         transfer_val = findViewById(R.id.transfer_val);
         detailListview = findViewById(R.id.detaillistview);
-        startpoint_val.setText(""+startpoint);
+        startpoint_val.setText(timers);
         destination_val.setText(""+destination);
-        expense_val.setText(""+expense);
-        transfer_val.setText(""+transfer);
+        transfer_val.setText(transfer+"회");
         setPath(shortest_path);
     }
 
@@ -80,7 +87,11 @@ public class DetailPathActivity extends AppCompatActivity {
 
         //화면의 역 배열에 맞게 시간표 재조정 -------------------------> 되는지 확인하기
         ArrayList<String> modifyTimeList = modifyTimeList(totalTimeList);
+        expense_val.setText(modifyTimeList.get(modifyTimeList.size()-1));
         Log.d(TAG, "수정된  total : " + modifyTotalList);
+        
+        //알람 시간 구하기
+        //alarmTimeList = getAlarmTimeList(modifyTimeList);
 
         //첫번째 역에 대한 호선 정보 ( 변하지 않음 )
         int defaultLine = totalLineList.get(1);
@@ -177,9 +188,43 @@ public class DetailPathActivity extends AppCompatActivity {
         return modifyList;
     }
 
+    public String minusMinutes(String time, int minutesToSubtract) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        try {
+            Date date = sdf.parse(time);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.add(Calendar.MINUTE, -minutesToSubtract);
+            return sdf.format(calendar.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // 예외 처리: 올바르지 않은 형식의 문자열이 들어온 경우
+            return null;
+        }
+    }
+
+
+    private ArrayList<String> getAlarmTimeList(ArrayList<String> modifyTimeList){
+        ArrayList<String> alarmTimeList = new ArrayList<>();
+        int gap = 3;
+        for(int i=3;i>=0;i--){
+            alarmTimeList.add(minusMinutes(modifyTimeList.get(0),i));
+        }
+
+        for(int i=1;i<modifyTimeList.size();i++){
+            if (modifyTimeList.get(i-1).equals("0")){
+                for(int j=3;i>=0;i--){
+                    alarmTimeList.add(modifyTimeList.get(j));
+                }
+            }
+        }
+        Log.d(TAG, "시간 리스트  : " + alarmTimeList);
+        return alarmTimeList;
+    }
+
+
     private ArrayList<String> modifyTimeList(ArrayList<String> totalTimeList){
         ArrayList<String> modifyList = new ArrayList<>();
-
         if (totalTimeList.size() == 2){
             modifyList.add(totalTimeList.get(0));
             modifyList.add(totalTimeList.get(1));

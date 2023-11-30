@@ -34,7 +34,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="출발지"
+                        android:text="총 소요시간"
                         android:textSize="15sp" />
 
                     <TextView
@@ -80,7 +80,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="총 비용"
+                        android:text="도착 시간"
                         android:textSize="15sp" />
 
                     <TextView
@@ -88,7 +88,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="환승역 개수"
+                        android:text="환승 횟수"
                         android:textSize="15sp" />
                 </TableRow>
 

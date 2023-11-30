@@ -89,14 +89,16 @@
 
                 <TableLayout
                     android:layout_width="400dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="70dp"
                     android:layout_gravity="center">
 
                     <!-- 첫 번째 행 -->
                     <TableRow
                         android:layout_width="400dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center">
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:divider="?android:attr/listDivider"
+                        android:showDividers="none">
 
                         <!-- 첫 번째 열 -->
                         <TextView
@@ -105,10 +107,10 @@
                             android:layout_weight="1"
                             android:paddingLeft="20dp"
                             android:paddingTop="10dp"
-                            android:textStyle="bold"
                             android:text="검색 옵션"
                             android:textColor="@color/black"
-                            android:textSize="15sp" />
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
                         <!-- 두 번째 열 -->
                         <TextView
@@ -128,10 +130,10 @@
                             android:layout_weight="1"
                             android:paddingLeft="20dp"
                             android:paddingTop="10dp"
-                            android:textStyle="bold"
                             android:text="출발 시간"
                             android:textColor="@color/black"
-                            android:textSize="15sp" />
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/start_time"
@@ -145,6 +147,14 @@
                             android:textSize="15sp" />
 
                     </TableRow>
+                    <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="11dp" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@android:color/darker_gray" />
+
 
                     <!-- 두 번째 행 -->
                     <TableRow
@@ -152,14 +162,34 @@
                         android:layout_height="50dp">
 
                         <TextView
+                            android:layout_width="24dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:gravity="right"
+                            android:text="소요 시간"
+                            android:textColor="@color/black"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
                             android:id="@+id/total_time"
-                            android:layout_width="40dp"
+                            android:layout_width="20dp"
                             android:layout_height="30dp"
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="00분"
                             android:textColor="@color/black"
                             android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="1dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:gravity="right"
+                            android:text="비용"
+                            android:textColor="@color/black"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
                         <!-- 세 번째 열 -->
                         <TextView
@@ -173,8 +203,18 @@
                             android:textSize="15sp" />
 
                         <TextView
+                            android:layout_width="20dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="환승횟수"
+                            android:textColor="@color/black"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
                             android:id="@+id/total_distance"
-                            android:layout_width="40dp"
+                            android:layout_width="20dp"
                             android:layout_height="30dp"
                             android:layout_weight="1"
                             android:gravity="center"
@@ -190,7 +230,7 @@
                 android:layout_height="325dp"
                 android:divider="@android:color/darker_gray"
                 android:layout_weight="1"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:orientation="horizontal">
 
                 <ListView

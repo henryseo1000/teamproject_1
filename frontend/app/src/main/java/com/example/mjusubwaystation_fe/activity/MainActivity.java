@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     Date now;
     RetrofitInterface service1;
     Callback path_fun, station_fun;
+    private String gettime;
 
     private ArrayList<Integer> stationlines;
     private ArrayList<ArrayList<Integer>> station_list;
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
                     path_result = response.body();
+                    String getType ="최소 시간";
                     Log.d(TAG, "성공 : \n" + path_result.toString());
 
                     Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
@@ -114,6 +116,9 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("destination", path_result.getEnd());
                     intent.putExtra("time", path_result.getTime());
                     intent.putExtra("path", toArrayListS(path_result.getShortestPath()));
+                    Log.d(TAG, "intent put하는 시점");
+                    intent.putExtra("time", gettime);
+                    intent.putExtra("type", getType);
                     intent.putExtra("totalLineList", toArrayListI(path_result.getTotalLineList()));
                     intent.putExtra("totalTimeList", toArrayListS(path_result.getShortestTime()));
                     intent.putExtra("expense", path_result.getTotalPrice());
@@ -176,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     mOnPopupClick(station,modify_list);
+
                     Log.d(TAG, "각 호선은 : " + stationlines.toString());
                     Log.d(TAG, "성공 : \n" + station_result.getSurroundStationList().toString());
                 }
@@ -223,9 +229,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "" + now.toString());
 
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                    String gettime = format.format(now);
+                    gettime = format.format(now);
 
-                    //Log.d(TAG, "버튼을 누른 시점 : " + gettime);
+                    Log.d(TAG, "버튼을 누른 시점 : " + gettime);
 
                     getPath = service1.getPathData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
                     getPath.enqueue(path_fun);
