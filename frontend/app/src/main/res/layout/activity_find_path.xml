@@ -14,85 +14,57 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="230dp"
-            android:orientation="vertical"
-            android:padding="20dp"
+            android:layout_height="190dp"
             android:background="#ffffff"
-            android:elevation="5dp">
+            android:elevation="5dp"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:paddingTop="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp"
+                android:id="@+id/option_bar">
+
+                <Button
+                    android:layout_width="80dp"
+                    android:layout_height="35dp"
+                    android:text="검색 옵션"
+                    android:textSize="10sp"
+                    android:id="@+id/btn_dialog"
+                    />
+
+                <Button
+                    android:layout_width="100dp"
+                    android:layout_height="35dp"
+                    android:text="출발 시간 설정"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="10sp"
+                    android:id="@+id/Show_Time"
+                    />
+
+            </LinearLayout>
+
+
 
             <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:id="@+id/edit_startpoint"
-                android:hint="출발지 입력"
-                />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="출발지 입력" />
 
             <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:id="@+id/edit_destination"
-                android:hint="도착지 입력"
-                />
-
-            <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="경로 재검색"
+                android:hint="도착지 입력" />
+
+            <Button
                 android:id="@+id/find_path_retry"
-                />
-
-            <Button
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="경로 선택"
-                android:id="@+id/btn_choose_path"
-                />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:background="#DDDDFF"
-            android:paddingLeft="20dp"
-            android:paddingVertical="5dp"
-            android:id="@+id/option_bar">
-
-            <Button
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:gravity="center"
-                android:text="검색 옵션"
-                android:textSize="10sp"
-                android:id="@+id/btn_dialog"
-                />
-
-            <Button
-                android:layout_width="100dp"
-                android:layout_height="40dp"
-                android:gravity="center"
-                android:text="출발 시간 설정"
-                android:layout_marginLeft="10dp"
-                android:textSize="10sp"
-                android:id="@+id/Show_Time"
-                />
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="20dp"
-                android:gravity="left"
-                android:layout_marginLeft="10dp"
-                android:textSize="10sp"
-                android:id="@+id/Show_Time_Text"
-                />
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="20dp"
-                android:gravity="left"
-                android:layout_marginLeft="10dp"
-                android:textSize="10sp"
-                android:id="@+id/filter"
-                />
+                android:text="경로 재검색" />
 
         </LinearLayout>
 
@@ -103,20 +75,118 @@
             android:background="#ffffff"
             android:id="@+id/content">
 
-            <TextView
-                android:id="@+id/textView"
+
+
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:paddingLeft="20dp"
-                android:paddingTop="10dp"
-                android:textSize="15sp"
-                android:textColor="@color/black"
-                tools:layout_editor_absoluteX="168dp"
-                tools:layout_editor_absoluteY="123dp" />
+                android:layout_height="70dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/black">
+
+
+                <TableLayout
+                    android:layout_width="400dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center">
+
+                    <!-- 첫 번째 행 -->
+                    <TableRow
+                        android:layout_width="400dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center">
+
+                        <!-- 첫 번째 열 -->
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:paddingLeft="20dp"
+                            android:paddingTop="10dp"
+                            android:textStyle="bold"
+                            android:text="검색 옵션"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <!-- 두 번째 열 -->
+                        <TextView
+                            android:id="@+id/type"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingLeft="20dp"
+                            android:paddingTop="10dp"
+                            android:text="최소 시간"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingLeft="20dp"
+                            android:paddingTop="10dp"
+                            android:textStyle="bold"
+                            android:text="출발 시간"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/start_time"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingLeft="20dp"
+                            android:paddingTop="10dp"
+                            android:text="14:43"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                    </TableRow>
+
+                    <!-- 두 번째 행 -->
+                    <TableRow
+                        android:layout_width="400dp"
+                        android:layout_height="50dp">
+
+                        <TextView
+                            android:id="@+id/total_time"
+                            android:layout_width="40dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="00분"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <!-- 세 번째 열 -->
+                        <TextView
+                            android:id="@+id/total_expense"
+                            android:layout_width="40dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="1000원"
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/total_distance"
+                            android:layout_width="40dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text=""
+                            android:textColor="@color/black"
+                            android:textSize="15sp" />
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="325dp"
+                android:divider="@android:color/darker_gray"
                 android:layout_weight="1"
                 android:layout_marginTop="16dp"
                 android:orientation="horizontal">
@@ -125,9 +195,24 @@
                     android:id="@+id/listview2"
                     android:layout_width="200dp"
                     android:layout_height="match_parent"
-                    android:divider="@android:color/transparent"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:divider="@android:color/transparent" />
 
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/black">
+
+                <Button
+                    android:layout_width="300dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:text="경로 선택"
+                    android:id="@+id/btn_choose_path"
+                    />
             </LinearLayout>
 
         </LinearLayout>
