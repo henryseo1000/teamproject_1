@@ -8,10 +8,12 @@ import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListS
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.core.net.ParseException;
 
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -57,7 +59,7 @@ public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview, Show_Time_Text;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
-    private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer, distance;
+    private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer, distance, uniqueId = 0;
     private String option = "최소시간", setting_time = "", alarmTime;
     private ArrayList<Integer> shortest_path;
     private ArrayList<Integer> totalLineList;
@@ -123,12 +125,10 @@ public class FindPathActivity extends AppCompatActivity {
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if (response.isSuccessful()) {
                     RouteDTO result = response.body();
-                    result.getShortestTime();
-                    setContent();
-                    now = new Date();
+
+                    setAlarm(new ArrayList<>(result.getShortestTime()));
 
                     showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
-                    setAlarm("2023-11-27 20:08:00");
 
                     Intent intent = new Intent(getApplicationContext(), DetailPathActivity.class);
                     intent.putExtra("startpoint", startpoint);
@@ -272,9 +272,27 @@ public class FindPathActivity extends AppCompatActivity {
         notificationManager.notify(0, n_builder.build());
     }
 
-    public void setAlarm(String from) {
-        AlarmReceiver ar = new AlarmReceiver();
-        //ar.setAlarm();
+    public void setAlarm(ArrayList<String> yourTimeArray) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        // 시간 배열에서 각 시간에 대해 알림 설정
+        for (String time : yourTimeArray) {
+            // "HH:mm" 포맷의 문자열을 밀리초로 변환
+            long timeInMillis = convertTimeToMillis(time);
+
+            Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    getApplicationContext(),
+                    uniqueId,  // 고유한 ID로 설정 (각 알림에 대해 다른 ID 사용)
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            // AlarmManager에 알림 설정
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+            uniqueId++;
+            Log.d(TAG,"시간 : " + timeInMillis + ", ID : " + uniqueId);
+        }
     }
 
     private String toTime(int seconds){
@@ -346,6 +364,25 @@ public class FindPathActivity extends AppCompatActivity {
         }
 
         return modifyPath;
+    }
+
+    private long convertTimeToMillis(String time) {
+        try {
+            // "HH:mm" 포맷의 문자열을 밀리초로 변환
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+            int hour = Integer.parseInt(time.substring(0,2));
+            int minute = Integer.parseInt(time.substring(3,5));
+            Date date = new Date();
+
+            date.setHours(hour);
+            date.setMinutes(minute);
+
+            Log.d(TAG, date.toString());
+            return date.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     ///////////////////////테스트////////////////////////////////////////////////////////
