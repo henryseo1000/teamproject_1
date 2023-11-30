@@ -113,11 +113,14 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("startpoint", path_result.getStart());
                     intent.putExtra("destination", path_result.getEnd());
                     intent.putExtra("time", path_result.getTime());
-                    intent.putExtra("path", toArrayListS(path_result.getShortestPath()));
+                    intent.putExtra("path", toArrayListI(path_result.getShortestPath()));
                     intent.putExtra("totalLineList", toArrayListI(path_result.getTotalLineList()));
                     intent.putExtra("totalTimeList", toArrayListS(path_result.getShortestTime()));
                     intent.putExtra("expense", path_result.getTotalPrice());
                     intent.putExtra("transfer", path_result.getTransferCount());
+                    intent.putExtra("alarmTime", time_text);
+                    intent.putExtra("distance", path_result.getDistance());
+                    intent.putExtra("result_dto", path_result);
 
                     startActivity(intent);
                 }
@@ -146,33 +149,17 @@ public class MainActivity extends AppCompatActivity {
                     modify_list = modifySurroundList(station_result.getSurroundStationList());
                     selected_line = stationlines.get(0);
 
-                    if(stationlines.size() == 1){
-                        if(station_list.get(0).get(0) == 0){
-                            prev_station = 0;
-                            next_station = station_list.get(1).get(0);
-                        }
-                        else if(station_list.get(1).get(0) == 0){
-                            prev_station = station_list.get(0).get(0);
-                            next_station = 0;
-                        }
-                        else {
-                            prev_station = station_list.get(0).get(0);
-                            next_station = station_list.get(1).get(0);
-                        }
+                    if(station_list.get(0).get(0) == 0){
+                        prev_station = 0;
+                        next_station = station_list.get(1).get(0);
                     }
-                    else{
-                        if(station_list.get(0).get(0) == 0){
-                            prev_station = 0;
-                            next_station = station_list.get(1).get(0);
-                        }
-                        else if(station_list.get(1).get(0) == 0){
-                            prev_station = station_list.get(0).get(0);
-                            next_station = 0;
-                        }
-                        else {
-                            prev_station = station_list.get(0).get(0);
-                            next_station = station_list.get(1).get(0);
-                        }
+                    else if(station_list.get(1).get(0) == 0){
+                        prev_station = station_list.get(0).get(0);
+                        next_station = 0;
+                    }
+                    else {
+                        prev_station = station_list.get(0).get(0);
+                        next_station = station_list.get(1).get(0);
                     }
 
                     mOnPopupClick(station,modify_list);
@@ -223,11 +210,11 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "" + now.toString());
 
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                    String gettime = format.format(now);
+                    time_text = format.format(now);
 
                     //Log.d(TAG, "버튼을 누른 시점 : " + gettime);
 
-                    getPath = service1.getPathData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
+                    getPath = service1.getPathData(start, end, "최소시간", time_text);// 현재 시간을 디폴트로
                     getPath.enqueue(path_fun);
                 }
                 catch(Exception e) {
@@ -331,7 +318,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return path_list;
     }
-
 
     public static void pressed_location(float curX, float curY){
         if(curX > 0.038879395 && curY > 0.4860061 && curX < 0.056935627 && curY < 0.5073234){ // 101

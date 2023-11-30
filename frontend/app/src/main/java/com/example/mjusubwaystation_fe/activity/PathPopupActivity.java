@@ -165,6 +165,4 @@ public class PathPopupActivity extends Activity {
         float density = getResources().getDisplayMetrics().density;
         return Math.round(dp * density);
     }
-
-
 }
