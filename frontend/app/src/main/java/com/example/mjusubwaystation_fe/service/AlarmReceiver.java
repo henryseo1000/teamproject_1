@@ -42,15 +42,11 @@ public class AlarmReceiver extends BroadcastReceiver {
         );
         // 시간을 "HH:mm" 포맷으로 변환
         String formattedTime = formatTime(System.currentTimeMillis());
-
         // 알림 소리 설정
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
         channel = new NotificationChannel("CHANNEL_ID" + uniqueId, "CHANNEL_NAME" + uniqueId, NotificationManager.IMPORTANCE_DEFAULT);
         notificationManager.createNotificationChannel(channel);
-
         // 알림 생성
         Notification.Builder notificationBuilder = new Notification.Builder(context, "CHANNEL_ID" + uniqueId)
                 .setSmallIcon(R.mipmap.ic_launcher)  // 알림 아이콘
@@ -59,11 +55,9 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setAutoCancel(true)  // 알림을 터치하면 자동으로 삭제
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
-
         // 알림 표시
         notificationManager.notify(0, notificationBuilder.build());
     }
-
     private String formatTime(long timeInMillis) {
         // 시간을 "HH:mm" 포맷으로 변환하는 메서드
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");

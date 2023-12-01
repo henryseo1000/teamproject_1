@@ -264,6 +264,7 @@ public class FindPathActivity extends AppCompatActivity {
         notificationManager.notify(0, n_builder.build());
     }
 
+    //알람 세팅 부분
     public void setAlarm(String from) {
         //AlarmReceiver에 값 전달
         Intent receiverIntent = new Intent(getApplicationContext(), AlarmReceiver.class);

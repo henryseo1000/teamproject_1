@@ -4,9 +4,16 @@ import static android.content.ContentValues.TAG;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
@@ -15,6 +22,7 @@ import android.widget.TextView;
 import com.example.mjusubwaystation_fe.DTO.AlarmDTO;
 import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 import com.example.mjusubwaystation_fe.R;
+import com.example.mjusubwaystation_fe.service.AlarmReceiver;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 
 import java.text.ParseException;
@@ -36,7 +44,8 @@ public class DetailPathActivity extends AppCompatActivity {
     AlarmDTO alarmDTO;
     Call<AlarmDTO> getAlarmData;
     private ArrayList<Integer> totalLineList;
-    private int time;
+    private NotificationCompat.Builder n_builder;
+    private int time, uniqueId=0;
     Callback alarm_fun;
     private int startpoint;
     private int destination;
@@ -87,6 +96,12 @@ public class DetailPathActivity extends AppCompatActivity {
                     contentList = alarmDTO.getContentList();
                     Log.d(TAG, "제목  : " + titleList);
                     Log.d(TAG, "내용 : " + contentList);
+
+                    //////////////실제 알람 설정 코드/////////////////////////////////////////////////
+                    setAlarm(alarmTimeList);
+                    showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                    ///////////////////////////////////////////////////////////////////////////////
+
                 }
                 else{
                     Log.d(TAG, "실패 : \n");
@@ -277,6 +292,75 @@ public class DetailPathActivity extends AppCompatActivity {
         Log.d(TAG, "수정된 리스트  : " + modifyList);
         return modifyList;
     }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void showNotification(String message, String title){
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_LOW;
+
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    "test1",
+                    "Test1",
+                    importance
+            );
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        n_builder = new NotificationCompat.Builder(this, "test1");
+
+        n_builder.setSmallIcon(R.drawable.clock);
+        n_builder.setContentTitle(title);
+        n_builder.setContentText(message);
+
+        notificationManager.notify(0, n_builder.build());
+    }
+
+
+    //알람 설정
+    public void setAlarm(ArrayList<String> yourTimeArray) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        // 시간 배열에서 각 시간에 대해 알림 설정
+        for (String time : yourTimeArray) {
+            // "HH:mm" 포맷의 문자열을 밀리초로 변환
+            long timeInMillis = convertTimeToMillis(time);
+            Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    getApplicationContext(),
+                    uniqueId,  // 고유한 ID로 설정 (각 알림에 대해 다른 ID 사용)
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            // AlarmManager에 알림 설정
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+            uniqueId++;
+            Log.d(TAG,"시간 : " + timeInMillis + ", ID : " + uniqueId);
+        }
+    }
+
+
+
+
+
+    private long convertTimeToMillis(String time) {
+        // "HH:mm" 포맷의 문자열을 밀리초로 변환
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        int hour = Integer.parseInt(time.substring(0,2));
+        int minute = Integer.parseInt(time.substring(3,5));
+        Date date = new Date();
+
+        date.setHours(hour);
+        date.setMinutes(minute);
+        date.setSeconds(0);
+
+        Log.d(TAG, date.toString());
+        return date.getTime();
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     private ArrayList<String> getPointTime(ArrayList<String> modifyTimeList){
         titleList = new ArrayList<>();
