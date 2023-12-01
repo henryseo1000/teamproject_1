@@ -2,6 +2,7 @@ package com.example.mjusubwaystation_fe.activity;
 
 import static android.content.ContentValues.TAG;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -11,7 +12,10 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.mjusubwaystation_fe.DTO.AlarmDTO;
+import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 import com.example.mjusubwaystation_fe.R;
+import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,15 +24,25 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class DetailPathActivity extends AppCompatActivity {
 
+    RetrofitInterface service1;
+    AlarmDTO alarmDTO;
+    Call<AlarmDTO> getAlarmData;
     private ArrayList<Integer> totalLineList;
     private int time;
+    Callback alarm_fun;
     private int startpoint;
     private int destination;
     private ArrayList<String> shortest_path;
-    private ArrayList<String>  totalTimeList;
-    private ArrayList<String>  alarmTimeList;
+    private ArrayList<String>  totalTimeList, modifyTime;
+    private ArrayList<String> alarmTimeList, titleList, contentList;
     private int expense;
     private int transfer;
     private TextView startpoint_val, destination_val, expense_val, transfer_val;
@@ -53,6 +67,36 @@ public class DetailPathActivity extends AppCompatActivity {
         totalTimeList = intent.getStringArrayListExtra("totalTimeList");
         timers = intent.getStringExtra("timeresult");
 
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://43.202.63.57:8080/")
+//                .baseUrl("http://10.0.2.2:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        service1 = retrofit.create(RetrofitInterface.class);
+
+        alarm_fun = new Callback<AlarmDTO>() {
+            @Override
+            public void onResponse(Call<AlarmDTO> call, Response<AlarmDTO> response) {
+                if(response.isSuccessful()){
+                    alarmDTO = response.body();
+                    Log.d(TAG, "성공 : \n" + alarmDTO.toString());
+                    alarmTimeList = alarmDTO.getAlarmTimeList();
+                    Log.d(TAG, "알람이 울릴 시간 : " + alarmTimeList);
+                    titleList = alarmDTO.getTitleList();
+                    contentList = alarmDTO.getContentList();
+                    Log.d(TAG, "제목  : " + titleList);
+                    Log.d(TAG, "내용 : " + contentList);
+                }
+                else{
+                    Log.d(TAG, "실패 : \n");
+                }
+            }
+            @Override
+            public void onFailure(Call<AlarmDTO> call, Throwable t) {
+                Log.d(TAG, "onFailure : " + t.getMessage());
+            }
+        };
 
         //화면에 매칭
         startpoint_val = findViewById(R.id.startpoint_val);
@@ -64,6 +108,15 @@ public class DetailPathActivity extends AppCompatActivity {
         destination_val.setText(""+destination);
         transfer_val.setText(transfer+"회");
         setPath(shortest_path);
+
+        //서버와 통신
+        try {
+            getAlarmData = service1.getAlarmData(getPointTime(modifyTime));
+            getAlarmData.enqueue(alarm_fun);
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage());
+        }
+
     }
 
 
@@ -85,13 +138,13 @@ public class DetailPathActivity extends AppCompatActivity {
         //totalLineList를 조건에 맞춰 나타내기 위해 갱신함
         ArrayList<Integer> modifyTotalList = modifyTotalLineList(totalLineList);
 
-        //화면의 역 배열에 맞게 시간표 재조정 -------------------------> 되는지 확인하기
+
+
+        /////////////////화면의 역 배열에 맞게 시간표 재조정
         ArrayList<String> modifyTimeList = modifyTimeList(totalTimeList);
         expense_val.setText(modifyTimeList.get(modifyTimeList.size()-1));
-        Log.d(TAG, "수정된  total : " + modifyTotalList);
-        
-        //알람 시간 구하기
-        //alarmTimeList = getAlarmTimeList(modifyTimeList);
+        modifyTime = modifyTimeList;
+
 
         //첫번째 역에 대한 호선 정보 ( 변하지 않음 )
         int defaultLine = totalLineList.get(1);
@@ -188,41 +241,6 @@ public class DetailPathActivity extends AppCompatActivity {
         return modifyList;
     }
 
-    public String minusMinutes(String time, int minutesToSubtract) {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-        try {
-            Date date = sdf.parse(time);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            calendar.add(Calendar.MINUTE, -minutesToSubtract);
-            return sdf.format(calendar.getTime());
-        } catch (ParseException e) {
-            e.printStackTrace();
-            // 예외 처리: 올바르지 않은 형식의 문자열이 들어온 경우
-            return null;
-        }
-    }
-
-
-    private ArrayList<String> getAlarmTimeList(ArrayList<String> modifyTimeList){
-        ArrayList<String> alarmTimeList = new ArrayList<>();
-        int gap = 3;
-        for(int i=3;i>=0;i--){
-            alarmTimeList.add(minusMinutes(modifyTimeList.get(0),i));
-        }
-
-        for(int i=1;i<modifyTimeList.size();i++){
-            if (modifyTimeList.get(i-1).equals("0")){
-                for(int j=3;i>=0;i--){
-                    alarmTimeList.add(modifyTimeList.get(j));
-                }
-            }
-        }
-        Log.d(TAG, "시간 리스트  : " + alarmTimeList);
-        return alarmTimeList;
-    }
-
-
     private ArrayList<String> modifyTimeList(ArrayList<String> totalTimeList){
         ArrayList<String> modifyList = new ArrayList<>();
         if (totalTimeList.size() == 2){
@@ -258,5 +276,27 @@ public class DetailPathActivity extends AppCompatActivity {
         }
         Log.d(TAG, "수정된 리스트  : " + modifyList);
         return modifyList;
+    }
+
+    private ArrayList<String> getPointTime(ArrayList<String> modifyTimeList){
+        titleList = new ArrayList<>();
+        contentList = new ArrayList<>();
+
+        ArrayList<String> pointTimeList = new ArrayList<>();
+        pointTimeList.add(modifyTimeList.get(0));
+        for(int i=1;i<modifyTimeList.size();i++){
+            String time = modifyTimeList.get(i-1);
+            if ( time.equals("0") ){
+                pointTimeList.add( modifyTimeList.get(i) );
+            }
+        }
+
+        for(int i=3;i>=0;i--){
+            //titleList.add("[출발역 열차 알림]");
+            //contentList.add("출발역 열차 도착 "+i+"분 전입니다!");
+        }
+
+
+        return pointTimeList;
     }
 }
