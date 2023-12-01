@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -57,11 +58,9 @@ public class StationController {
     })
 
     @GetMapping("/select")
-    public ResponseEntity<AlarmDTO> selectOptimizedRoute(@ModelAttribute OptimizedRoute optimizedRoute, @RequestParam boolean alarmsetting) throws IOException {
-        AlarmDTO alarmDTO = null;
-        if (alarmsetting) {
-            alarmDTO = alarmService.getAlarmTime(optimizedRoute);
-        }
+    public ResponseEntity<AlarmDTO> selectOptimizedRoute(@RequestParam ArrayList<String> pointTimeList) throws IOException {
+        AlarmDTO alarmDTO = new AlarmDTO();
+        alarmDTO = alarmService.getAlarmTime(pointTimeList);
         return new ResponseEntity<>(alarmDTO, HttpStatus.OK);
     }
 

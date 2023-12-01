@@ -6,87 +6,73 @@ import com.main.station.dto.StationDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class AlarmService {
 
-    public AlarmDTO getAlarmTime(OptimizedRoute optimizedRoute) {
-        AlarmDTO alarmDTO = new AlarmDTO();
 
-        //알림을 울릴 시간의 인덱스 리스트
-        List<String> pointTimeList = getPointTimeList(optimizedRoute.getShortestTime(),optimizedRoute.getTotalLineList());
-        System.out.println("pointTimeList = " + pointTimeList);
-        
-        //AlarmDTO에 넣을 컬렉션
-        List<String> boardingList = new ArrayList<>();
-        List<List<String>> transferList = new ArrayList<>();
+    public AlarmDTO getAlarmTime(ArrayList<String> pointTimeList){
+        AlarmDTO alarmDTO;
+        ArrayList<String> alarmTime = new ArrayList<>();
+        ArrayList<String> title = new ArrayList<>();
+        ArrayList<String> content = new ArrayList<>();
 
-        int index=0;
-        for(String time:pointTimeList) {
-            if (index==0) {
-                System.out.println("boarding에 넣을 시간 = " + time);
-                boardingList = getAlarmTime(time);
-            } else {
-                System.out.println("transfer에 넣을 시간 = " + time);
-                transferList.add(getAlarmTime(time));
-            }
-            index++;
+
+        int gap = 3;
+        int size = pointTimeList.size();
+
+//      포인트 타임이 2개 이상일 때
+
+        for (int i = gap; i >= 1; i--) {
+            alarmTime.add(minusMinutes(pointTimeList.get(0), i));
+            title.add("[출발역 열차 알림]");
+            content.add("출발역 열차 도착 "+i+"분 전입니다!");
         }
-        alarmDTO.setBoardingTimeList(boardingList);
-        alarmDTO.setTransferTimeList(transferList);
+
+        if (size > 1) {
+            for (int i = 1; i < size; i++) {
+                //간격에 따라 알람 시간 저장함
+                for (int j = gap; j >= 1; j--) {
+                    //실제 알람이 울릴 시간
+                    String setTime = minusMinutes(pointTimeList.get(i), j);
+                    //만약 알람시간이 이미 포함돼 있으면,
+                    if (alarmTime.contains(setTime)) {
+                        continue;
+                    } else {
+                        alarmTime.add(setTime);
+                        title.add("[환승역 열차 알림]");
+                        content.add("환승역 열차 도착 "+j+"분 전입니다!");
+                    }
+
+                }
+            }
+        }
+
+        alarmDTO = AlarmDTO.setResult(alarmTime,title,content);
+
         return alarmDTO;
     }
-    
-    // 실제 알람 울릴 시간을 컬렉션으로 반환해줌
-    public List<String> getAlarmTime(String time){
 
-        List<String> alarmTimeList;
-        //시간 리스트를 저장해 반환할 컬렉션
-        alarmTimeList = setTimeList(time);
-        return alarmTimeList;
-    }
-    
-    //알람 울릴 시간을 계산하는 메서드
-    public List<String> setTimeList(String item){
 
-        //문자열->시간 변환
-        List<String> alarmTimeList = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalTime time;
-        time  = LocalTime.parse(item, formatter);
-        
-        for(int i=4;i>=0;i--){
-            LocalTime setTime = time.minusMinutes(i);
-            //시간->문자열 변환
-            String alarmTime = setTime.format(formatter);
-            alarmTimeList.add(alarmTime);
+    public String minusMinutes(String time, int gap) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        try {
+            Date date = sdf.parse(time);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.add(Calendar.MINUTE, -gap);
+            return sdf.format(calendar.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // 예외 처리: 올바르지 않은 형식의 문자열이 들어온 경우
+            return null;
         }
-        return alarmTimeList;
-    }
-    
-    // 첫 역 출발시간, 환승역의 출발 시간에 대한 리스트 (알람 필터 전)
-    public List<String> getPointTimeList(List<String> totalTimeList, List<Integer> totalLineList) {
-        List<String> pointTimeList = new ArrayList<>();
-        int comp = totalLineList.get(1);
-        pointTimeList.add(totalTimeList.get(0));
-        for (int i=1;i<totalLineList.size();i=i+2){
-            int getLine = totalLineList.get(i);
-            if ( getLine ==0 ){
-                break;
-            }
-            if (comp != getLine){
-                pointTimeList.add(totalTimeList.get(i-1));
-
-            }
-            comp = getLine;
-        }
-        return pointTimeList;
     }
 
 }
