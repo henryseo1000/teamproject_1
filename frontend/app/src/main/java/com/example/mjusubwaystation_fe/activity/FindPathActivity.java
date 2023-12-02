@@ -103,7 +103,6 @@ public class FindPathActivity extends AppCompatActivity {
                     time = result.getTime();
                     expense = result.getTotalPrice();
                     transfer = result.getTransferCount();
-
                     setContent();
                     Log.d(TAG, "성공 : \n" + result.toString());
                 } else {
@@ -120,9 +119,14 @@ public class FindPathActivity extends AppCompatActivity {
             }
         };
 
+
+        
+
+//        api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
         listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
+
 
         type = (TextView) findViewById(R.id.type);
         startTime = (TextView) findViewById(R.id.start_time);
@@ -159,6 +163,7 @@ public class FindPathActivity extends AppCompatActivity {
                                 startTime.setText(gettime);
                                 // 시간 설정 후 경로 재검색 버튼 자동으로 누르기
                                 find_path_retry.performClick();
+
                             }
                         },alarmHour, alarmMinute, false);
                 timePickerDialog.show();
@@ -186,7 +191,8 @@ public class FindPathActivity extends AppCompatActivity {
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                setAlarm("2023-11-27 20:08:00");
 
                 Intent intent = new Intent(getApplicationContext(), DetailPathActivity.class);
                 intent.putExtra("startpoint", startpoint);
@@ -258,6 +264,28 @@ public class FindPathActivity extends AppCompatActivity {
         notificationManager.notify(0, n_builder.build());
     }
 
+    //알람 세팅 부분
+    public void setAlarm(String from) {
+        //AlarmReceiver에 값 전달
+        Intent receiverIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        //날짜 포맷을 바꿔주는 소스코드
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date datetime = now;
+        try {
+            datetime = dateFormat.parse(from);
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(datetime);
+        Log.d(TAG, "알람 세팅 시간은 : " + datetime);
+
+        alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+    }
+
     private String toTime(int seconds){
         int hours = 0;
         int minutes = 0;
@@ -271,7 +299,7 @@ public class FindPathActivity extends AppCompatActivity {
         left = left % 60;
 
         if (hours == 0){
-            str = minutes + "분";
+            str = minutes+"분";
         } else {
             str = hours + "시간 " + hours + "분";
         }
@@ -321,12 +349,20 @@ public class FindPathActivity extends AppCompatActivity {
 
     private void setContent(){
         setPath(shortest_path);
+//        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
+//                + time + "초\n약 " + toTime(time) + " 소요됩니다."
+//        + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
 
         type.setText(searchType);
         startTime.setText(gettime);
         totalTime.setText(rs);
         totalExpense.setText(expense+"원");
         totalTransfer.setText(transfer+"회");
+
+
+
+
+
     }
 
     public ArrayList modifyPath (ArrayList<String> path){

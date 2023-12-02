@@ -2,9 +2,6 @@ package com.example.mjusubwaystation_fe.activity;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListI;
-import static com.example.mjusubwaystation_fe.activity.MainActivity.toArrayListS;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
@@ -45,11 +42,11 @@ public class DetailPathActivity extends AppCompatActivity {
 
     RetrofitInterface service1;
     AlarmDTO alarmDTO;
-    Call<RouteDTO> getAlarmData;
+    Call<AlarmDTO> getAlarmData;
     private ArrayList<Integer> totalLineList;
     private NotificationCompat.Builder n_builder;
-    private int time, uniqueId = 0;
-    Callback<RouteDTO> alarm_fun;
+    private int time, uniqueId=0;
+    Callback alarm_fun;
     private int startpoint;
     private int destination;
     private ArrayList<String> shortest_path;
@@ -59,7 +56,7 @@ public class DetailPathActivity extends AppCompatActivity {
     private int transfer;
     private TextView startpoint_val, destination_val, expense_val, transfer_val;
 
-    private String timers, start_time;
+    private String timers;
     private ListView detailListview;
 
     @Override
@@ -81,31 +78,37 @@ public class DetailPathActivity extends AppCompatActivity {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://43.202.63.57:8080/")
+//                .baseUrl("http://10.0.2.2:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         service1 = retrofit.create(RetrofitInterface.class);
 
-        alarm_fun = new Callback<RouteDTO>() {
+        alarm_fun = new Callback<AlarmDTO>() {
             @Override
-            public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
-                if (response.isSuccessful()) {
-                    RouteDTO result = response.body();
+            public void onResponse(Call<AlarmDTO> call, Response<AlarmDTO> response) {
+                if(response.isSuccessful()){
+                    alarmDTO = response.body();
+                    Log.d(TAG, "성공 : \n" + alarmDTO.toString());
+                    alarmTimeList = alarmDTO.getAlarmTimeList();
+                    Log.d(TAG, "알람이 울릴 시간 : " + alarmTimeList);
+                    titleList = alarmDTO.getTitleList();
+                    contentList = alarmDTO.getContentList();
+                    Log.d(TAG, "제목  : " + titleList);
+                    Log.d(TAG, "내용 : " + contentList);
 
-                    setAlarm(new ArrayList<>(result.getShortestTime()));
-                    showNotification("경로 선택이 완료되었습니다!", "경로 선택 완료");
+                    //////////////실제 알람 설정 코드/////////////////////////////////////////////////
+                    showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                    setAlarm(alarmTimeList,titleList,contentList);
+                    ///////////////////////////////////////////////////////////////////////////////
 
-                    Log.d(TAG, "성공 : \n" + result.toString());
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(DetailPathActivity.this);
-                    builder.setMessage("통신 오류입니다. 잠시 후 다시 시도해주세요.");
-                    builder.setTitle("일시적인 오류");
-                    builder.show();
+                }
+                else{
                     Log.d(TAG, "실패 : \n");
                 }
             }
             @Override
-            public void onFailure(Call<RouteDTO> call, Throwable t) {
+            public void onFailure(Call<AlarmDTO> call, Throwable t) {
                 Log.d(TAG, "onFailure : " + t.getMessage());
             }
         };
@@ -123,7 +126,7 @@ public class DetailPathActivity extends AppCompatActivity {
 
         //서버와 통신
         try {
-            getAlarmData = service1.getPathData(startpoint, destination, "최소시간", timers);
+            getAlarmData = service1.getAlarmData(getPointTime(modifyTime));
             getAlarmData.enqueue(alarm_fun);
         } catch (Exception e) {
             Log.d(TAG, e.getMessage());
@@ -317,27 +320,54 @@ public class DetailPathActivity extends AppCompatActivity {
 
 
     //알람 설정
-    public void setAlarm(ArrayList<String> yourTimeArray) {
+    public void setAlarm(ArrayList<String> yourTimeArray, ArrayList<String> yourTitleArray, ArrayList<String> yourContentArray) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Calendar currentCalendar = Calendar.getInstance();
 
         for (int i = 0; i < yourTimeArray.size(); i++) {
             String time = yourTimeArray.get(i);
+            String title = yourTitleArray.get(i);
+            String content = yourContentArray.get(i);
 
             long timeInMillis = convertTimeToMillis(time);
             Calendar alarmTime = Calendar.getInstance();
             alarmTime.setTimeInMillis(timeInMillis);
 
-            Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-            int uniqueId = generateUniqueId();
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    getApplicationContext(),
-                    uniqueId,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
+            if (alarmTime.after(currentCalendar)) {
+                Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+                int uniqueId = generateUniqueId();
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                        getApplicationContext(),
+                        uniqueId,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
 
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+
+                // 각 반복에 대해 새로운 NotificationCompat.Builder를 생성
+                NotificationCompat.Builder n_builder = new NotificationCompat.Builder(this, "test1");
+
+                // 이 알림에 대한 제목과 내용 설정
+                n_builder.setSmallIcon(R.drawable.clock);
+                n_builder.setContentTitle(title);
+                n_builder.setContentText(content);
+
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    int importance = NotificationManager.IMPORTANCE_LOW;
+                    NotificationChannel notificationChannel = new NotificationChannel(
+                            "test1",
+                            "Test1",
+                            importance
+                    );
+                    notificationManager.createNotificationChannel(notificationChannel);
+                }
+
+                // 각 알림에 대해 고유한 ID로 알림 전송
+                notificationManager.notify(uniqueId, n_builder.build());
+            }
         }
 
     }

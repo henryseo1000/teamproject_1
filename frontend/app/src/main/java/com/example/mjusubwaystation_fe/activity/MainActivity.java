@@ -124,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("expense", path_result.getTotalPrice());
                     intent.putExtra("transfer", path_result.getTransferCount());
 
-
                     startActivity(intent);
                 }
                 else{
