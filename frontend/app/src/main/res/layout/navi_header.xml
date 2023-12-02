@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:text ="홍길동"
+        android:text ="MJU Subway"
         android:textColor="@color/white"
         android:textSize="25sp"/>
 
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="20, 남자"
+        android:text="당신을 위한 간편하고 편리한 노선도 어플리케이션"
         android:textColor="@color/white"
         android:textSize="14sp"/>
 

@@ -8,10 +8,12 @@ import android.os.Bundle;
 
 import com.example.mjusubwaystation_fe.R;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.core.view.GravityCompat;
@@ -22,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.DTO.RouteDTO;
@@ -56,13 +59,14 @@ public class MainActivity extends AppCompatActivity {
     private RouteDTO path_result;
     private StationDTO station_result;
     private int nowLine;
+    public static boolean isNotif = true;
     float curX, curY;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Date now;
     RetrofitInterface service1;
     Callback path_fun, station_fun;
-
+    private String gettime;
     private ArrayList<Integer> stationlines;
     private ArrayList<ArrayList<Integer>> station_list;
     private ArrayList<Integer> modify_list;
@@ -93,20 +97,12 @@ public class MainActivity extends AppCompatActivity {
         destination_input = (EditText) findViewById(R.id.edit_destination);
         settings = (TextView) findViewById(R.id.settings);
 
-        FloatingActionButton fb = findViewById(R.id.fab);
-        fb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapActivity.class);
-                startActivity(intent);
-            }
-        });
-
         path_fun = new Callback<RouteDTO>() {
             @Override
             public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
                 if(response.isSuccessful()){
                     path_result = response.body();
+                    String getType ="최소 시간";
                     Log.d(TAG, "성공 : \n" + path_result.toString());
 
                     Intent intent = new Intent(MainActivity.this, FindPathActivity.class);
@@ -114,6 +110,9 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("destination", path_result.getEnd());
                     intent.putExtra("time", path_result.getTime());
                     intent.putExtra("path", toArrayListS(path_result.getShortestPath()));
+                    Log.d(TAG, "intent put하는 시점");
+                    intent.putExtra("time", gettime);
+                    intent.putExtra("type", getType);
                     intent.putExtra("totalLineList", toArrayListI(path_result.getTotalLineList()));
                     intent.putExtra("totalTimeList", toArrayListS(path_result.getShortestTime()));
                     intent.putExtra("expense", path_result.getTotalPrice());
@@ -176,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     mOnPopupClick(station,modify_list);
+
                     Log.d(TAG, "각 호선은 : " + stationlines.toString());
                     Log.d(TAG, "성공 : \n" + station_result.getSurroundStationList().toString());
                 }
@@ -223,9 +223,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "" + now.toString());
 
                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                    String gettime = format.format(now);
+                    gettime = format.format(now);
 
-                    //Log.d(TAG, "버튼을 누른 시점 : " + gettime);
+                    Log.d(TAG, "버튼을 누른 시점 : " + gettime);
 
                     getPath = service1.getPathData(start, end, "최소시간", gettime);// 현재 시간을 디폴트로
                     getPath.enqueue(path_fun);
@@ -248,10 +248,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         attacher.setOnPhotoTapListener(new OnPhotoTapListener() {
-//            private void printString(String s) {
-//                //좌표 출력
-//                output.setText(s); //한 줄씩 추가
-//            }
             @Override
             public void onPhotoTap(ImageView view, float x, float y) {
                 curX = x;  //눌린 곳의 X좌표
@@ -260,13 +256,38 @@ public class MainActivity extends AppCompatActivity {
 
                 pressed_location(curX, curY);
 
-//                printString("손가락 눌림 : " + curX + ", " + curY);
                 Log.d(TAG,"손가락 눌림 : " + curX + ", " + curY);
 
                 if(station != NULL) {
                     getStationInfo = service1.getStationInfo(station);
                     getStationInfo.enqueue(station_fun);
                 }
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                switch (menuItem.getItemId())
+                {
+                    case R.id.app_bar_switch:
+                        isNotif = !isNotif;
+                        if(isNotif) {
+                            Toast.makeText(getApplicationContext(), "알림이 설정되었습니다.", Toast.LENGTH_SHORT).show();
+                            menuItem.setCheckable(true);
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "알림이 비활성화되었습니다.", Toast.LENGTH_SHORT).show();
+                            menuItem.setCheckable(false);
+                        }
+                        break;
+
+                    case R.id.item_info:
+                        Toast.makeText(getApplicationContext(), "명지대학교 지하철 노선도 어플리케이션입니다.", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+
+                return true;
             }
         });
     }
@@ -282,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("next", next_station);
         intent.putExtra("surrList", surrList);
         intent.putExtra("nowline", selected_line);
-        //intent.putExtra("result", station_result.getSurroundStationList());
+
         startActivity(intent);
     }
 
@@ -732,5 +753,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return modifyList;
     }
-
 }

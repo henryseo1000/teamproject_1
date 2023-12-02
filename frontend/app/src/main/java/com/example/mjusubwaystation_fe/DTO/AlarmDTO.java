@@ -1,40 +1,44 @@
 package com.example.mjusubwaystation_fe.DTO;
 
 import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class AlarmDTO {
 
 
-    @SerializedName("alarmSetting")
-    private boolean alarmSetting;
-    @SerializedName("boardingTimeList")
-    private List<String> boardingTimeList;
-    @SerializedName("transferTimeList")
-    private List<List<String>> transferTimeList;
+    @SerializedName("alarmTimeList")
+    private ArrayList<String> alarmTimeList;
+    @SerializedName("titleList")
+    private ArrayList<String> titleList;
+    @SerializedName("contentList")
+    private ArrayList<String> contentList;
 
-    public boolean isAlarmSetting() {
-        return alarmSetting;
+
+    public ArrayList<String> getAlarmTimeList() {return alarmTimeList;}
+    public ArrayList<String> getTitleList() {return titleList;}
+    public ArrayList<String> getContentList() {return contentList;}
+
+    @Override
+    public String toString(){
+        return "AlarmDTO{" +
+                "alarmTimeList=" + alarmTimeList +
+                ", titleList=" + titleList +
+                ", contentList='" + contentList + '\''  +
+                '}';
     }
 
-    public void setAlarmSetting(boolean alarmSetting) {
-        this.alarmSetting = alarmSetting;
+    public void setAlarmTimeList(ArrayList<String> alarmTimeList) {
+        this.alarmTimeList = alarmTimeList;
     }
 
-    public List<String> getBoardingTimeList() {
-        return boardingTimeList;
+    public void setTitleList(ArrayList<String> titleList) {
+        this.titleList = titleList;
     }
 
-    public void setBoardingTimeList(List<String> boardingTimeList) {
-        this.boardingTimeList = boardingTimeList;
-    }
-
-    public List<List<String>> getTransferTimeList() {
-        return transferTimeList;
-    }
-
-    public void setTransferTimeList(List<List<String>> transferTimeList) {
-        this.transferTimeList = transferTimeList;
+    public void setContentList(ArrayList<String> contentList) {
+        this.contentList = contentList;
     }
 }

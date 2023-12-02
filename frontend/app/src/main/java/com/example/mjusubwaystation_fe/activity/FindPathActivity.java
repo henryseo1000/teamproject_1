@@ -42,10 +42,12 @@ import com.example.mjusubwaystation_fe.service.AlarmReceiver;
 import com.example.mjusubwaystation_fe.service.RetrofitInterface;
 import com.example.mjusubwaystation_fe.DTO.RouteDTO;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,7 +57,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview;
-    public TextView type,startTime, totalTime, totalExpense, totalDistance;
+    public TextView type,startTime, totalTime, totalExpense, totalTransfer;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
     private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
@@ -69,6 +71,7 @@ public class FindPathActivity extends AppCompatActivity {
     private AlertDialog.Builder a_builder;
     private Call<RouteDTO> call;
     private Date now;
+    private String gettime, searchType, rs, lastTime, firstTime;
     private NotificationManager notificationManager;
     private AlarmManager alarmManager;
     private NotificationCompat.Builder n_builder;
@@ -116,6 +119,9 @@ public class FindPathActivity extends AppCompatActivity {
             }
         };
 
+
+        
+
 //        api_textview = (TextView) findViewById(R.id.textView);
         content = (LinearLayout) findViewById(R.id.content);
         listview2 = (ListView) findViewById(R.id.listview2);
@@ -126,7 +132,7 @@ public class FindPathActivity extends AppCompatActivity {
         startTime = (TextView) findViewById(R.id.start_time);
         totalTime = (TextView) findViewById(R.id.total_time);
         totalExpense = (TextView) findViewById(R.id.total_expense);
-        totalDistance = (TextView) findViewById(R.id.total_distance);
+        totalTransfer = (TextView) findViewById(R.id.total_distance);
 
         
         //시간설정
@@ -153,6 +159,8 @@ public class FindPathActivity extends AppCompatActivity {
                                 now.setMinutes(minute);
                                 Toast.makeText(getApplicationContext(), "설정된 시간은 : " + now.getHours() + "시 " + now.getMinutes() + "분입니다.", Toast.LENGTH_SHORT).show();
 
+                                gettime = formatDateToString(now,"HH:mm");
+                                startTime.setText(gettime);
                                 // 시간 설정 후 경로 재검색 버튼 자동으로 누르기
                                 find_path_retry.performClick();
 
@@ -166,7 +174,12 @@ public class FindPathActivity extends AppCompatActivity {
         time = intent.getIntExtra("time", 0);
         startpoint = intent.getIntExtra("startpoint", 0);
         destination = intent.getIntExtra("destination", 0);
+        searchType = intent.getStringExtra("type");
+
         shortest_path = intent.getStringArrayListExtra("path");
+        gettime = intent.getStringExtra("time");
+        Log.d(TAG, "넘어온 값 : " + gettime);
+
         totalLineList = intent.getIntegerArrayListExtra("totalLineList");
         totalTimeList = intent.getStringArrayListExtra("totalTimeList");
         expense = intent.getIntExtra("expense", 0);
@@ -174,14 +187,10 @@ public class FindPathActivity extends AppCompatActivity {
 
         startpoint_input.setText(Integer.toString(startpoint));
         destination_input.setText(Integer.toString(destination));
-
         setContent();
         choose_path.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
-                setAlarm("2023-11-27 20:08:00");
-
                 Intent intent = new Intent(getApplicationContext(), DetailPathActivity.class);
                 intent.putExtra("startpoint", startpoint);
                 intent.putExtra("destination", destination);
@@ -191,6 +200,7 @@ public class FindPathActivity extends AppCompatActivity {
                 intent.putExtra("path", shortest_path);
                 intent.putExtra("expense", expense);
                 intent.putExtra("transfer", transfer);
+                intent.putExtra("timeresult", rs);
 
                 startActivity(intent);
             }
@@ -251,6 +261,7 @@ public class FindPathActivity extends AppCompatActivity {
         notificationManager.notify(0, n_builder.build());
     }
 
+    //알람 세팅 부분
     public void setAlarm(String from) {
         //AlarmReceiver에 값 전달
         Intent receiverIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
@@ -322,6 +333,9 @@ public class FindPathActivity extends AppCompatActivity {
                     option = "최단거리";
                 }
                 Toast.makeText(getApplicationContext(), "다시 검색하시면 " + filters[which] + " 옵션으로 검색됩니다.", Toast.LENGTH_SHORT).show();
+
+                searchType = option;
+                type.setText(searchType);
                 find_path_retry.performClick();
             }
         });
@@ -332,20 +346,12 @@ public class FindPathActivity extends AppCompatActivity {
 
     private void setContent(){
         setPath(shortest_path);
-//        api_textview.setText(startpoint + "에서 " + destination + "까지 가는데 걸리는 시간은 : "
-//                + time + "초\n약 " + toTime(time) + " 소요됩니다."
-//        + "\n총 비용은 : " + expense + "원, 환승 횟수 : " + transfer + "회");
 
-        type.setText("---");
-        startTime.setText("---");
-        totalTime.setText(toTime(time));
+        type.setText(searchType);
+        startTime.setText(gettime);
+        totalTime.setText(rs);
         totalExpense.setText(expense+"원");
-        totalDistance.setText(""+transfer);
-
-
-
-
-
+        totalTransfer.setText(transfer+"회");
     }
 
     public ArrayList modifyPath (ArrayList<String> path){
@@ -363,6 +369,41 @@ public class FindPathActivity extends AppCompatActivity {
         return modifyPath;
     }
 
+    private String formatDateToString(Date date, String pattern) {
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.getDefault());
+        return sdf.format(date);
+    }
+
+    private String timeDiff(String startTime, String endTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+        String result;
+        try {
+            Date startDate = sdf.parse(startTime);
+            Date endDate = sdf.parse(endTime);
+
+            // 시간 간격을 밀리초로 계산
+            long timeDifferenceMillis = endDate.getTime() - startDate.getTime();
+
+            // 밀리초를 분 단위로 변환
+            int timeDifferenceMinutes = (int) (timeDifferenceMillis / (60 * 1000));
+
+            if (timeDifferenceMinutes<60){
+                result = timeDifferenceMinutes+"분";
+                return result;
+            } else {
+                int h = timeDifferenceMinutes/60;
+                int m = timeDifferenceMinutes%60;
+                result = h+"시간 "+m+"분";
+                return result;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // 날짜 포맷이 잘못된 경우 예외 처리
+            return null; // 오류 상태를 나타내는 값으로 -1을 반환
+        }
+    }
+
     ///////////////////////테스트////////////////////////////////////////////////////////
     private List<CombinedItem> createCombinedItemList(ArrayList<String> path) {
 
@@ -375,9 +416,10 @@ public class FindPathActivity extends AppCompatActivity {
 
         //첫번째 역에 대한 호선 정보
         int defaultLine = totalLineList.get(1);
+        firstTime = totalTimeList.get(0);
         int resourceIdNode = typedArrayNodeStart.getResourceId(defaultLine - 1, 0);
         int resourceIdLine = typedArrayLine.getResourceId(defaultLine - 1, 0);
-        combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(0)+"       -        "+totalTimeList.get(0))); // modifyPath에 해당하는 텍스트 추가
+        combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(0)+"       -        "+firstTime)); // modifyPath에 해당하는 텍스트 추가
         combinedItemList.add(new CombinedItem(resourceIdLine, ""));
 
         //그 이후의 역에 대해서 이미지 및 텍스트를 결합하여 CombinedItem 추가
@@ -388,8 +430,10 @@ public class FindPathActivity extends AppCompatActivity {
 
             //마지막 역인 경우
             if (compLine == 0) {
+                lastTime = totalTimeList.get(k-1);
+                rs = timeDiff(firstTime,lastTime);
                 resourceIdNode = typedArrayNodeEnd.getResourceId(defaultLine - 1, 0);
-                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j)+"       -        "+totalTimeList.get(k-1))); // modifyPath에 해당하는 텍스트 추가
+                combinedItemList.add(new CombinedItem(resourceIdNode, shortest_path.get(j)+"       -        "+lastTime)); // modifyPath에 해당하는 텍스트 추가
                 break;
             }
 

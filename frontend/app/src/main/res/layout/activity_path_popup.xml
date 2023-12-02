@@ -4,7 +4,7 @@
     android:layout_width="360dp"
     android:layout_height="350dp"
     android:backgroundTint="@color/white"
-    android:background="@drawable/button_round">
+    android:background="@drawable/button_round2">
 
 
     <LinearLayout
@@ -36,7 +36,7 @@
             android:gravity="bottom|center"
             android:textStyle="bold"
             android:text="1호선"
-            android:textColor="#421593"
+            android:textColor="#1E305E"
             android:textSize="24sp" />
 
         <LinearLayout
@@ -86,7 +86,7 @@
             android:id="@+id/time_table"
             android:layout_width="90dp"
             android:layout_height="45dp"
-            android:backgroundTint="#FF6200EE"
+            android:backgroundTint="#060F1C"
             android:gravity="center"
             android:text="시간표"
             android:textSize="15sp" />
