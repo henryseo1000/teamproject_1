@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("destination", path_result.getEnd());
                     intent.putExtra("time", path_result.getTime());
                     intent.putExtra("path", toArrayListS(path_result.getShortestPath()));
-                    Log.d(TAG, "intent put하는 시점");
                     intent.putExtra("time", gettime);
+                    intent.putExtra("distance", path_result.getDistance());
                     intent.putExtra("type", getType);
                     intent.putExtra("totalLineList", toArrayListI(path_result.getTotalLineList()));
                     intent.putExtra("totalTimeList", toArrayListS(path_result.getShortestTime()));

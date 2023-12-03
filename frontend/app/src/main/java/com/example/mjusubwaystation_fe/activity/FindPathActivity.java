@@ -57,10 +57,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FindPathActivity extends AppCompatActivity {
     public TextView api_textview;
-    public TextView type,startTime, totalTime, totalExpense, totalTransfer;
+    public TextView type,startTime, totalTime, totalExpense, totalTransfer, totalDistance;
     private Button choose_path, btn_dialog, find_path_retry, show_time;
     private EditText destination_input, startpoint_input;
-    private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer;
+    private int alarmHour = 0, alarmMinute = 0, time, startpoint, destination, expense = 0, transfer,distance;
     private String option = "최소시간";
     private ArrayList<String> shortest_path;
     private ArrayList<Integer> totalLineList;
@@ -127,12 +127,12 @@ public class FindPathActivity extends AppCompatActivity {
         listview2 = (ListView) findViewById(R.id.listview2);
         btn_dialog = (Button)findViewById(R.id.btn_dialog);
 
-
         type = (TextView) findViewById(R.id.type);
         startTime = (TextView) findViewById(R.id.start_time);
         totalTime = (TextView) findViewById(R.id.total_time);
         totalExpense = (TextView) findViewById(R.id.total_expense);
-        totalTransfer = (TextView) findViewById(R.id.total_distance);
+        totalTransfer = (TextView) findViewById(R.id.total_transfer);
+        totalDistance = (TextView)findViewById(R.id.total_distance);
 
         
         //시간설정
@@ -178,6 +178,7 @@ public class FindPathActivity extends AppCompatActivity {
 
         shortest_path = intent.getStringArrayListExtra("path");
         gettime = intent.getStringExtra("time");
+        distance = intent.getIntExtra("distance",0);
         Log.d(TAG, "넘어온 값 : " + gettime);
 
         totalLineList = intent.getIntegerArrayListExtra("totalLineList");
@@ -352,6 +353,7 @@ public class FindPathActivity extends AppCompatActivity {
         totalTime.setText(rs);
         totalExpense.setText(expense+"원");
         totalTransfer.setText(transfer+"회");
+        totalDistance.setText(distance+"");
     }
 
     public ArrayList modifyPath (ArrayList<String> path){

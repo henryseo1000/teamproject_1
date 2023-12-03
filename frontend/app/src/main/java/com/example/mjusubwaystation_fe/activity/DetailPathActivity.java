@@ -16,10 +16,8 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.mjusubwaystation_fe.DTO.AlarmDTO;
 import com.example.mjusubwaystation_fe.DTO.RouteDTO;
@@ -54,7 +52,8 @@ public class DetailPathActivity extends AppCompatActivity {
     private ArrayList<String> shortest_path;
     private ArrayList<String>  totalTimeList, modifyTime;
     private ArrayList<String> alarmTimeList, titleList, contentList;
-    private int transfer, expense;
+    private int expense;
+    private int transfer;
     private TextView startpoint_val, destination_val, expense_val, transfer_val;
 
     private String timers;
@@ -79,6 +78,7 @@ public class DetailPathActivity extends AppCompatActivity {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://43.202.63.57:8080/")
+//                .baseUrl("http://10.0.2.2:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -97,15 +97,11 @@ public class DetailPathActivity extends AppCompatActivity {
                     Log.d(TAG, "제목  : " + titleList);
                     Log.d(TAG, "내용 : " + contentList);
 
-                    if(MainActivity.isNotif){
-                        //////////////실제 알람 설정 코드/////////////////////////////////////////////////
-                        showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
-                        setAlarm(alarmTimeList);
-                        ///////////////////////////////////////////////////////////////////////////////
-                    }
-                    else {
-                        Toast.makeText(getApplicationContext(), "알림 설정이 비활성화되어 있습니다.", Toast.LENGTH_SHORT).show();
-                    }
+                    //////////////실제 알람 설정 코드/////////////////////////////////////////////////
+                    showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                    setAlarm(alarmTimeList,titleList,contentList);
+                    ///////////////////////////////////////////////////////////////////////////////
+
                 }
                 else{
                     Log.d(TAG, "실패 : \n");
@@ -138,6 +134,8 @@ public class DetailPathActivity extends AppCompatActivity {
 
     }
 
+
+
     private List<CombinedItem2> createCombinedItemList(ArrayList<String> path) {
 
         List<CombinedItem2> combinedItemList = new ArrayList<>();
@@ -161,6 +159,7 @@ public class DetailPathActivity extends AppCompatActivity {
         ArrayList<String> modifyTimeList = modifyTimeList(totalTimeList);
         expense_val.setText(modifyTimeList.get(modifyTimeList.size()-1));
         modifyTime = modifyTimeList;
+
 
         //첫번째 역에 대한 호선 정보 ( 변하지 않음 )
         int defaultLine = totalLineList.get(1);
@@ -294,6 +293,9 @@ public class DetailPathActivity extends AppCompatActivity {
         return modifyList;
     }
 
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void showNotification(String message, String title){
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -316,29 +318,79 @@ public class DetailPathActivity extends AppCompatActivity {
         notificationManager.notify(0, n_builder.build());
     }
 
+
     //알람 설정
-    public void setAlarm(ArrayList<String> yourTimeArray) {
+    public void setAlarm(ArrayList<String> yourTimeArray, ArrayList<String> yourTitleArray, ArrayList<String> yourContentArray) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Calendar currentCalendar = Calendar.getInstance();
 
-        // 시간 배열에서 각 시간에 대해 알림 설정
-        for (String time : yourTimeArray) {
-            // "HH:mm" 포맷의 문자열을 밀리초로 변환
+        for (int i = 0; i < yourTimeArray.size(); i++) {
+            String time = yourTimeArray.get(i);
+//            String title = yourTitleArray.get(i);
+//            String content = yourContentArray.get(i);
+
             long timeInMillis = convertTimeToMillis(time);
+            Calendar alarmTime = Calendar.getInstance();
+            alarmTime.setTimeInMillis(timeInMillis);
 
+//            if (alarmTime.after(currentCalendar)) {
+//                Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+//                int uniqueId = generateUniqueId();
+//                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+//                        getApplicationContext(),
+//                        uniqueId,
+//                        intent,
+//                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+//                );
+//
+//                alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+
+                // 각 반복에 대해 새로운 NotificationCompat.Builder를 생성
+//                NotificationCompat.Builder n_builder = new NotificationCompat.Builder(this, "test1");
+//
+//                // 이 알림에 대한 제목과 내용 설정
+//                n_builder.stSmallIcon(R.drawable.clock);
+//                n_builder.setContentTitle(title);
+//                n_builder.setContentText(content);
+//
+//                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    int importance = NotificationManager.IMPORTANCE_LOW;
+//                    NotificationChannel notificationChannel = new NotificationChannel(
+//                            "test1",
+//                            "Test1",
+//                            importance
+//                    );
+//                    notificationManager.createNotificationChannel(notificationChannel);
+//                }
+//
+//                // 각 알림에 대해 고유한 ID로 알림 전송
+//                notificationManager.notify(uniqueId, n_builder.build());
             Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+            int uniqueId = generateUniqueId();
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     getApplicationContext(),
-                    uniqueId,  // 고유한 ID로 설정 (각 알림에 대해 다른 ID 사용)
+                    uniqueId,
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
-
-            // AlarmManager에 알림 설정
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
-            uniqueId++;
-            Log.d(TAG,"시간 : " + timeInMillis + ", ID : " + uniqueId);
+
+
+
         }
+
     }
+
+    private int generateUniqueId() {
+        // 원하는 방식으로 ID를 생성하여 반환
+        // 여기서는 현재 시간을 기반으로 한 간단한 방식 사용
+        return (int) System.currentTimeMillis();
+    }
+
+
+
 
     private long convertTimeToMillis(String time) {
         // "HH:mm" 포맷의 문자열을 밀리초로 변환
@@ -354,6 +406,8 @@ public class DetailPathActivity extends AppCompatActivity {
         Log.d(TAG, date.toString());
         return date.getTime();
     }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     private ArrayList<String> getPointTime(ArrayList<String> modifyTimeList){
@@ -368,6 +422,12 @@ public class DetailPathActivity extends AppCompatActivity {
                 pointTimeList.add( modifyTimeList.get(i) );
             }
         }
+
+        for(int i=3;i>=0;i--){
+            //titleList.add("[출발역 열차 알림]");
+            //contentList.add("출발역 열차 도착 "+i+"분 전입니다!");
+        }
+
 
         return pointTimeList;
     }
