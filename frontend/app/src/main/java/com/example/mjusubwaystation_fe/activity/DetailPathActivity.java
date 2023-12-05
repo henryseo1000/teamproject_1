@@ -97,11 +97,12 @@ public class DetailPathActivity extends AppCompatActivity {
                     Log.d(TAG, "제목  : " + titleList);
                     Log.d(TAG, "내용 : " + contentList);
 
-                    //////////////실제 알람 설정 코드/////////////////////////////////////////////////
-                    showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
-                    setAlarm(alarmTimeList,titleList,contentList);
-                    ///////////////////////////////////////////////////////////////////////////////
-
+                    if(MainActivity.isNotif) {
+                        //////////////실제 알람 설정 코드/////////////////////////////////////////////////
+                        showNotification("경로를 선택하셨습니다!", "경로 선택 완료");
+                        setAlarm(alarmTimeList, titleList, contentList);
+                        ///////////////////////////////////////////////////////////////////////////////
+                    }
                 }
                 else{
                     Log.d(TAG, "실패 : \n");
