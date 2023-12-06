@@ -103,6 +103,7 @@ public class FindPathActivity extends AppCompatActivity {
                     time = result.getTime();
                     expense = result.getTotalPrice();
                     transfer = result.getTransferCount();
+                    distance = result.getDistance();
                     setContent();
                     Log.d(TAG, "성공 : \n" + result.toString());
                 } else {
